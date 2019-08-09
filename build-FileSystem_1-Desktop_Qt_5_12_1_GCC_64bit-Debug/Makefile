@@ -52,9 +52,17 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../FileSystem_1/main.cpp 
-OBJECTS       = main.o
-DIST          = ../../../../Qt/5.12.1/gcc_64/mkspecs/features/spec_pre.prf \
+SOURCES       = ../FileSystem_1/main.cpp \
+		../FileSystem_1/nodo.cpp \
+		../FileSystem_1/parser.cpp \
+		../FileSystem_1/scanner.cpp 
+OBJECTS       = main.o \
+		nodo.o \
+		parser.o \
+		scanner.o
+DIST          = ../FileSystem_1/Lexico.l \
+		../FileSystem_1/Sintactico.y \
+		../../../../Qt/5.12.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/common/unix.conf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/common/linux.conf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/common/sanitize.conf \
@@ -205,6 +213,7 @@ DIST          = ../../../../Qt/5.12.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/qt_config.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/spec_post.prf \
+		../FileSystem_1/.qmake.stash \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/toolchain.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -222,7 +231,12 @@ DIST          = ../../../../Qt/5.12.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/exceptions.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/yacc.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/lex.prf \
-		../FileSystem_1/FileSystem_1.pro  ../FileSystem_1/main.cpp
+		../FileSystem_1/FileSystem_1.pro ../FileSystem_1/nodo.h \
+		../FileSystem_1/parser.h \
+		../FileSystem_1/scanner.h ../FileSystem_1/main.cpp \
+		../FileSystem_1/nodo.cpp \
+		../FileSystem_1/parser.cpp \
+		../FileSystem_1/scanner.cpp
 QMAKE_TARGET  = FileSystem_1
 DESTDIR       = 
 TARGET        = FileSystem_1
@@ -385,6 +399,7 @@ Makefile: ../FileSystem_1/FileSystem_1.pro ../../../../Qt/5.12.1/gcc_64/mkspecs/
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/qt_config.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/toolchain.prf \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -556,6 +571,7 @@ Makefile: ../FileSystem_1/FileSystem_1.pro ../../../../Qt/5.12.1/gcc_64/mkspecs/
 ../../../../Qt/5.12.1/gcc_64/mkspecs/features/qt_config.prf:
 ../../../../Qt/5.12.1/gcc_64/mkspecs/linux-g++/qmake.conf:
 ../../../../Qt/5.12.1/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 ../../../../Qt/5.12.1/gcc_64/mkspecs/features/exclusive_builds.prf:
 ../../../../Qt/5.12.1/gcc_64/mkspecs/features/toolchain.prf:
 ../../../../Qt/5.12.1/gcc_64/mkspecs/features/default_pre.prf:
@@ -590,7 +606,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../../Qt/5.12.1/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../FileSystem_1/main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../FileSystem_1/nodo.h ../FileSystem_1/parser.h ../FileSystem_1/scanner.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../FileSystem_1/main.cpp ../FileSystem_1/nodo.cpp ../FileSystem_1/parser.cpp ../FileSystem_1/scanner.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -691,6 +708,98 @@ main.o: ../FileSystem_1/main.cpp ../../../../Qt/5.12.1/gcc_64/include/QtCore/QCo
 		../../../../Qt/5.12.1/gcc_64/include/QtCore/qobject_impl.h \
 		../../../../Qt/5.12.1/gcc_64/include/QtCore/qeventloop.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../FileSystem_1/main.cpp
+
+nodo.o: ../FileSystem_1/nodo.cpp ../FileSystem_1/nodo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstring.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qchar.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qglobal.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qconfig.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qtcore-config.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qsysinfo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qlogging.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qflags.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic_msvc.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qmutex.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qnumeric.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qversiontagging.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qbytearray.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qrefcount.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qnamespace.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qarraydata.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringliteral.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringview.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/QList \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qlist.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qalgorithms.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qiterator.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qhashfunctions.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qpair.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qbytearraylist.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringlist.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qregexp.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringmatcher.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o nodo.o ../FileSystem_1/nodo.cpp
+
+parser.o: ../FileSystem_1/parser.cpp ../FileSystem_1/scanner.h \
+		../FileSystem_1/nodo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstring.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qchar.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qglobal.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qconfig.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qtcore-config.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qsysinfo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qlogging.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qflags.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic_msvc.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qmutex.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qnumeric.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qversiontagging.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qbytearray.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qrefcount.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qnamespace.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qarraydata.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringliteral.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringview.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/QList \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qlist.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qalgorithms.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qiterator.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qhashfunctions.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qpair.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qbytearraylist.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringlist.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qregexp.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringmatcher.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parser.o ../FileSystem_1/parser.cpp
+
+scanner.o: ../FileSystem_1/scanner.cpp ../FileSystem_1/parser.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o scanner.o ../FileSystem_1/scanner.cpp
 
 ####### Install
 
