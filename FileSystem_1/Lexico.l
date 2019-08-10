@@ -13,6 +13,7 @@ entero [0-9]+
 caracter ({letra}|{entero})
 id {letra}({letra}|{entero}|"_")*
 cadena "\""[^"\""]*"\""
+extension "."{id}
 
 %%
 "mkdisk"    { return mkdisk; }
@@ -30,9 +31,14 @@ cadena "\""[^"\""]*"\""
 "-type"     { return type; }
 "-delete"   { return del; }
 "-add"      { return add; }
+"-id"       { return id; }
 "bf"        { return bf; }
 "ff"        { return ff; }
 "wf"        { return wf; }
+"Fast"      { return fast; }
+"Full"      { return full; }
+"mbr"       { return mbr; }
+"disk"      { return disk; }
 
 "="         { return igual; }
 "/"         { return diagonal; }
@@ -40,7 +46,8 @@ cadena "\""[^"\""]*"\""
 {entero}    {strcpy(yylval.text, yytext); return num;}
 {caracter}  {strcpy(yylval.text, yytext); return caracter;}
 {cadena}    {strcpy(yylval.text, yytext); return cadena;}
-{id}        {strcpy(yylval.text, yytext); return id;}
+{id}        {strcpy(yylval.text, yytext); return identificador;}
+{extension} {strcpy(yylval.text, yytext); return extension;}
 
 [[:blank:]] {}
 
