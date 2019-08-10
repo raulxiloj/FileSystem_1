@@ -15,7 +15,8 @@ QString Graficador::generarCodigoGraphviz(){
     dot += "node [shape=\"box\"]\n";
     dot += "NodoAST0[label=\"" + limpiarString(""+raiz->tipo+""+raiz->valor)+ "\"];\n";
     cont = 1;
-    recorrerAST("Nodo0",raiz);
+    recorrerAST("NodoAST0",raiz);
+    dot += "}";
     return dot;
 }
 

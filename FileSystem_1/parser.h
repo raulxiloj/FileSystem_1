@@ -60,12 +60,15 @@ extern int yydebug;
     type = 270,
     del = 271,
     add = 272,
-    igual = 273,
-    diagonal = 274,
-    num = 275,
-    caracter = 276,
-    cadena = 277,
-    id = 278
+    bf = 273,
+    ff = 274,
+    wf = 275,
+    igual = 276,
+    diagonal = 277,
+    num = 278,
+    caracter = 279,
+    cadena = 280,
+    id = 281
   };
 #endif
 
@@ -80,7 +83,7 @@ union YYSTYPE
         class Nodo *nodito;
     
 
-#line 84 "parser.h" /* yacc.c:1909  */
+#line 87 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

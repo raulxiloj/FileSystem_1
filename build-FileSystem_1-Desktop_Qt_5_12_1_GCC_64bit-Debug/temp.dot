@@ -1,0 +1,12 @@
+digraph G{
+node [shape="box"]
+NodoAST0[label="MKDISK"];
+NodoAST1[label= "ATRIBUTO "];
+NodoAST0->NodoAST1;
+NodoAST2[label= "Size 3000"];
+NodoAST1->NodoAST2;
+NodoAST3[label= "fit "];
+NodoAST1->NodoAST3;
+NodoAST4[label= "Ajuste bf"];
+NodoAST3->NodoAST4;
+}

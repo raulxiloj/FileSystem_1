@@ -30,6 +30,9 @@ cadena "\""[^"\""]*"\""
 "-type"     { return type; }
 "-delete"   { return del; }
 "-add"      { return add; }
+"bf"        { return bf; }
+"ff"        { return ff; }
+"wf"        { return wf; }
 
 "="         { return igual; }
 "/"         { return diagonal; }

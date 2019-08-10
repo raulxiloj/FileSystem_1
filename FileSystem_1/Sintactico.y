@@ -39,6 +39,9 @@
 %token <text> type
 %token <text> del
 %token <text> add
+%token <text> bf
+%token <text> ff
+%token <text> wf
 %token <text> igual
 %token <text> diagonal
 %token <text> num
@@ -51,6 +54,7 @@
 %type <nodito> COMANDO
 %type <nodito> MKDISK
 %type <nodito> ATRIBUTO_MK
+%type <nodito> AJUSTE
 
 %start INIT
 
@@ -74,4 +78,13 @@ MKDISK: MKDISK ATRIBUTO_MK {
 ATRIBUTO_MK: size igual num {
                               Nodo *n = new Nodo("Size",$3);
                               $$ = n;
-                            };
+                            }
+            |fit igual AJUSTE {
+                                Nodo *n = new Nodo ("fit", "");
+                                n->add(*$3);
+                                $$ = n;
+                               };
+
+AJUSTE: bf { $$ = new Nodo("Ajuste", "bf"); }
+        | ff { $$ = new Nodo("Ajuste", "ff"); }
+        | wf { $$ = new Nodo("Ajuste", "wf"); };

@@ -129,12 +129,15 @@ extern int yydebug;
     type = 270,
     del = 271,
     add = 272,
-    igual = 273,
-    diagonal = 274,
-    num = 275,
-    caracter = 276,
-    cadena = 277,
-    id = 278
+    bf = 273,
+    ff = 274,
+    wf = 275,
+    igual = 276,
+    diagonal = 277,
+    num = 278,
+    caracter = 279,
+    cadena = 280,
+    id = 281
   };
 #endif
 
@@ -149,7 +152,7 @@ union YYSTYPE
         class Nodo *nodito;
     
 
-#line 153 "parser.cpp" /* yacc.c:355  */
+#line 156 "parser.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -166,7 +169,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 170 "parser.cpp" /* yacc.c:358  */
+#line 173 "parser.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -406,23 +409,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  7
+#define YYFINAL  8
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   5
+#define YYLAST   10
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  24
+#define YYNTOKENS  27
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  5
+#define YYNNTS  6
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  6
+#define YYNRULES  10
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  11
+#define YYNSTATES  17
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   278
+#define YYMAXUTOK   281
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -458,14 +461,16 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    22,    23
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25,    26
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    59,    59,    61,    65,    69,    74
+       0,    63,    63,    65,    69,    73,    78,    82,    88,    89,
+      90
 };
 #endif
 
@@ -476,8 +481,9 @@ static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "mkdisk", "rmdisk", "fdisk", "mount",
   "unmount", "rep", "exec", "size", "unit", "path", "fit", "name", "type",
-  "del", "add", "igual", "diagonal", "num", "caracter", "cadena", "id",
-  "$accept", "INIT", "COMANDO", "MKDISK", "ATRIBUTO_MK", YY_NULLPTR
+  "del", "add", "bf", "ff", "wf", "igual", "diagonal", "num", "caracter",
+  "cadena", "id", "$accept", "INIT", "COMANDO", "MKDISK", "ATRIBUTO_MK",
+  "AJUSTE", YY_NULLPTR
 };
 #endif
 
@@ -488,7 +494,7 @@ static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278
+     275,   276,   277,   278,   279,   280,   281
 };
 # endif
 
@@ -506,8 +512,8 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,    -9,     2,   -17,   -15,    -9,   -17,   -17,   -16,   -17,
-     -17
+      -2,   -10,     2,   -17,   -13,   -12,   -10,   -17,   -17,   -16,
+     -14,   -17,   -17,   -17,   -17,   -17,   -17
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -515,20 +521,20 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     2,     0,     3,     5,     1,     0,     4,
-       6
+       0,     0,     0,     2,     0,     0,     3,     5,     1,     0,
+       0,     4,     6,     8,     9,    10,     7
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -17,   -17,   -17,   -17,     0
+     -17,   -17,   -17,   -17,     4,   -17
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     3,     5,     6
+      -1,     2,     3,     6,     7,    16
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -536,32 +542,36 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       1,     4,     7,     8,    10,     9
+       4,     1,     8,     5,    13,    14,    15,    12,     9,    10,
+      11
 };
 
 static const yytype_uint8 yycheck[] =
 {
-       3,    10,     0,    18,    20,     5
+      10,     3,     0,    13,    18,    19,    20,    23,    21,    21,
+       6
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    25,    26,    10,    27,    28,     0,    18,    28,
-      20
+       0,     3,    28,    29,    10,    13,    30,    31,     0,    21,
+      21,    31,    23,    18,    19,    20,    32
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    24,    25,    26,    27,    27,    28
+       0,    27,    28,    29,    30,    30,    31,    31,    32,    32,
+      32
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     2,     2,     1,     3
+       0,     2,     1,     2,     2,     1,     3,     3,     1,     1,
+       1
 };
 
 
@@ -1238,48 +1248,76 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 59 "Sintactico.y" /* yacc.c:1646  */
+#line 63 "Sintactico.y" /* yacc.c:1646  */
     { raiz = (yyval.nodito); }
-#line 1244 "parser.cpp" /* yacc.c:1646  */
+#line 1254 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 61 "Sintactico.y" /* yacc.c:1646  */
+#line 65 "Sintactico.y" /* yacc.c:1646  */
     { (yyval.nodito) = new Nodo("MKDISK","");
                          (yyval.nodito)->add(*(yyvsp[0].nodito));
                        }
-#line 1252 "parser.cpp" /* yacc.c:1646  */
+#line 1262 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 65 "Sintactico.y" /* yacc.c:1646  */
+#line 69 "Sintactico.y" /* yacc.c:1646  */
     {
                              (yyval.nodito) = (yyvsp[-1].nodito);
                              (yyval.nodito)->add(*(yyvsp[0].nodito));
                             }
-#line 1261 "parser.cpp" /* yacc.c:1646  */
+#line 1271 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 69 "Sintactico.y" /* yacc.c:1646  */
+#line 73 "Sintactico.y" /* yacc.c:1646  */
     {
                        (yyval.nodito) = new Nodo("ATRIBUTO","");
                        (yyval.nodito)->add(*(yyvsp[0].nodito));
                      }
-#line 1270 "parser.cpp" /* yacc.c:1646  */
+#line 1280 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 74 "Sintactico.y" /* yacc.c:1646  */
+#line 78 "Sintactico.y" /* yacc.c:1646  */
     {
                               Nodo *n = new Nodo("Size",(yyvsp[0].text));
                               (yyval.nodito) = n;
                             }
-#line 1279 "parser.cpp" /* yacc.c:1646  */
+#line 1289 "parser.cpp" /* yacc.c:1646  */
+    break;
+
+  case 7:
+#line 82 "Sintactico.y" /* yacc.c:1646  */
+    {
+                                Nodo *n = new Nodo ("fit", "");
+                                n->add(*(yyvsp[0].nodito));
+                                (yyval.nodito) = n;
+                               }
+#line 1299 "parser.cpp" /* yacc.c:1646  */
+    break;
+
+  case 8:
+#line 88 "Sintactico.y" /* yacc.c:1646  */
+    { (yyval.nodito) = new Nodo("Ajuste", "bf"); }
+#line 1305 "parser.cpp" /* yacc.c:1646  */
+    break;
+
+  case 9:
+#line 89 "Sintactico.y" /* yacc.c:1646  */
+    { (yyval.nodito) = new Nodo("Ajuste", "ff"); }
+#line 1311 "parser.cpp" /* yacc.c:1646  */
+    break;
+
+  case 10:
+#line 90 "Sintactico.y" /* yacc.c:1646  */
+    { (yyval.nodito) = new Nodo("Ajuste", "wf"); }
+#line 1317 "parser.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1283 "parser.cpp" /* yacc.c:1646  */
+#line 1321 "parser.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
