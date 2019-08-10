@@ -55,11 +55,13 @@ OBJECTS_DIR   = ./
 SOURCES       = ../FileSystem_1/main.cpp \
 		../FileSystem_1/nodo.cpp \
 		../FileSystem_1/parser.cpp \
-		../FileSystem_1/scanner.cpp 
+		../FileSystem_1/scanner.cpp \
+		../FileSystem_1/graficador.cpp 
 OBJECTS       = main.o \
 		nodo.o \
 		parser.o \
-		scanner.o
+		scanner.o \
+		graficador.o
 DIST          = ../FileSystem_1/Lexico.l \
 		../FileSystem_1/Sintactico.y \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/spec_pre.prf \
@@ -233,10 +235,12 @@ DIST          = ../FileSystem_1/Lexico.l \
 		../../../../Qt/5.12.1/gcc_64/mkspecs/features/lex.prf \
 		../FileSystem_1/FileSystem_1.pro ../FileSystem_1/nodo.h \
 		../FileSystem_1/parser.h \
-		../FileSystem_1/scanner.h ../FileSystem_1/main.cpp \
+		../FileSystem_1/scanner.h \
+		../FileSystem_1/graficador.h ../FileSystem_1/main.cpp \
 		../FileSystem_1/nodo.cpp \
 		../FileSystem_1/parser.cpp \
-		../FileSystem_1/scanner.cpp
+		../FileSystem_1/scanner.cpp \
+		../FileSystem_1/graficador.cpp
 QMAKE_TARGET  = FileSystem_1
 DESTDIR       = 
 TARGET        = FileSystem_1
@@ -606,8 +610,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../../Qt/5.12.1/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../FileSystem_1/nodo.h ../FileSystem_1/parser.h ../FileSystem_1/scanner.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../FileSystem_1/main.cpp ../FileSystem_1/nodo.cpp ../FileSystem_1/parser.cpp ../FileSystem_1/scanner.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../FileSystem_1/nodo.h ../FileSystem_1/parser.h ../FileSystem_1/scanner.h ../FileSystem_1/graficador.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../FileSystem_1/main.cpp ../FileSystem_1/nodo.cpp ../FileSystem_1/parser.cpp ../FileSystem_1/scanner.cpp ../FileSystem_1/graficador.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -800,6 +804,51 @@ parser.o: ../FileSystem_1/parser.cpp ../FileSystem_1/scanner.h \
 
 scanner.o: ../FileSystem_1/scanner.cpp ../FileSystem_1/parser.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o scanner.o ../FileSystem_1/scanner.cpp
+
+graficador.o: ../FileSystem_1/graficador.cpp ../FileSystem_1/graficador.h \
+		../FileSystem_1/nodo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstring.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qchar.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qglobal.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qconfig.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qtcore-config.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qsysinfo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qlogging.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qflags.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qatomic_msvc.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qmutex.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qnumeric.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qversiontagging.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qbytearray.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qrefcount.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qnamespace.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qarraydata.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringliteral.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringview.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/QList \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qlist.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qalgorithms.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qiterator.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qhashfunctions.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qpair.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qbytearraylist.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringlist.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qregexp.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qstringmatcher.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graficador.o ../FileSystem_1/graficador.cpp
 
 ####### Install
 

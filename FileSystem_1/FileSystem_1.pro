@@ -18,7 +18,8 @@ SOURCES += \
         main.cpp \
     nodo.cpp \
     parser.cpp \
-    scanner.cpp
+    scanner.cpp \
+    graficador.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -28,7 +29,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     nodo.h \
     parser.h \
-    scanner.h
+    scanner.h \
+    graficador.h
 
 DISTFILES += \
     Lexico.l \
