@@ -5,8 +5,6 @@ NodoAST1[label= "PARAMETRO "];
 NodoAST0->NodoAST1;
 NodoAST2[label= "size 3000"];
 NodoAST1->NodoAST2;
-NodoAST3[label= "unit k"];
+NodoAST3[label= "path /home/user/disco1.disk"];
 NodoAST1->NodoAST3;
-NodoAST4[label= "path /home/user/Disco1.disk"];
-NodoAST1->NodoAST4;
 }

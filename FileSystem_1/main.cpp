@@ -16,6 +16,7 @@ void recorrerMOUNT(Nodo*);
 void recorrerUNMOUNT(Nodo*);
 void recorrerREP(Nodo*);
 QString getRuta(Nodo);
+QString getDireccion(QString);
 
 using namespace std;
 
@@ -182,15 +183,25 @@ void recorrerMKDISK(Nodo *raiz)
             flagUnit = true;
             string temp = n.valor.toStdString();
             valUnit = temp[0];
+            if(valUnit == 'k'|| valUnit == 'K'){
+                valUnit = 'k';
+            }else if(valUnit == 'm' || valUnit == 'M'){
+                valUnit = 'm';
+            }else{
+                printf("ERROR: Valor del parametro unit no reconocido");
+                break;
+            }
         }else if(n.tipo_ == PATH){
             if(flagPath){
                 printf("ERROR: Parametro path ya agreagdo\n");
                 flag = true;
                 break; //ERROR
             }
+
             flagPath = true;
             valPath = n.valor;//Quitarle comillas si tiene
-
+            valPath = valPath.replace("\"","");
+            QString directorio = getDireccion(valPath);
         }
     }
 
@@ -434,3 +445,27 @@ QString getRuta(Nodo n){
     return "";
 }
 
+void crearArchivo(QString direccion){
+    QString comando = "sudo mkdir -p ";
+
+
+}
+
+QString getDireccion(QString direccion){
+    string aux = direccion.toStdString();
+    string delimiter = "/";
+    size_t pos = 0;
+    string res = "";
+    while((pos = aux.find(delimiter))!=string::npos){
+        res += aux.substr(0,pos)+"/";
+        //cout << res << endl;
+        aux.erase(0,pos + delimiter.length());
+    }
+    res = res.substr(1,res.length());
+    ///cout << res << endl;
+    return QString::fromStdString(res);
+}
+
+QString getArchivo(QString){
+
+}
