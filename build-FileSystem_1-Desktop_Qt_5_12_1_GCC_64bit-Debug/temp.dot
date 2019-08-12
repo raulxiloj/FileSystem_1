@@ -1,16 +1,12 @@
 digraph G{
 node [shape="box"]
-NodoAST0[label="EXEC"];
-NodoAST1[label= "AUX_RUTA "];
+NodoAST0[label="MKDISK"];
+NodoAST1[label= "PARAMETRO "];
 NodoAST0->NodoAST1;
-NodoAST2[label= "/ home"];
+NodoAST2[label= "size 3000"];
 NodoAST1->NodoAST2;
-NodoAST3[label= "AUX_RUTA "];
+NodoAST3[label= "unit k"];
 NodoAST1->NodoAST3;
-NodoAST4[label= "/ desktop"];
-NodoAST3->NodoAST4;
-NodoAST5[label= "AUX_RUTA "];
-NodoAST1->NodoAST5;
-NodoAST6[label= "calificacion .sh"];
-NodoAST5->NodoAST6;
+NodoAST4[label= "path /home/user/Disco1.disk"];
+NodoAST1->NodoAST4;
 }

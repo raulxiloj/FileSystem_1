@@ -189,11 +189,8 @@ void recorrerMKDISK(Nodo *raiz)
                 break; //ERROR
             }
             flagPath = true;
-            if(n.hijos.count() > 0){//Ruta sin comillas
-                getRuta(n);
-            }else{//Ruta con comillas
-                valPath = n.valor;
-            }
+            valPath = n.valor;//Quitarle comillas si tiene
+
         }
     }
 
@@ -425,7 +422,11 @@ void recorrerREP(Nodo *raiz){
 }
 
 void recorrerEXEC(Nodo *raiz){
+    if(raiz->hijos.count() > 0){ //Ruta con comillas
 
+    }else{ //Ruta sin comillas
+
+    }
 }
 
 QString getRuta(Nodo n){

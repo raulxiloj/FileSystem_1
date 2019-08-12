@@ -14,6 +14,8 @@ caracter ({letra}|{entero})
 id {letra}({letra}|{entero}|"_")*
 cadena "\""[^"\""]*"\""
 extension "."{id}
+diagonal "/"
+ruta ({diagonal}{id})+({diagonal}{id}{extension})
 
 %x COM
 
@@ -48,12 +50,12 @@ INITIAL
 
 
     "="         { return igual; }
-    "/"         { return diagonal; }
 
     {entero}    {strcpy(yylval.text, yytext); return num;}
     {caracter}  {strcpy(yylval.text, yytext); return caracter;}
     {cadena}    {strcpy(yylval.text, yytext); return cadena;}
     {id}        {strcpy(yylval.text, yytext); return identificador;}
+    {ruta}      {strcpy(yylval.text, yytext); return ruta;}
     {extension} {strcpy(yylval.text, yytext); return extension;}
 
     [[:blank:]] {}

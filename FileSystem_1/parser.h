@@ -69,12 +69,12 @@ extern int yydebug;
     mbr = 279,
     disk = 280,
     igual = 281,
-    diagonal = 282,
-    extension = 283,
-    num = 284,
-    caracter = 285,
-    cadena = 286,
-    identificador = 287
+    extension = 282,
+    num = 283,
+    caracter = 284,
+    cadena = 285,
+    identificador = 286,
+    ruta = 287
   };
 #endif
 

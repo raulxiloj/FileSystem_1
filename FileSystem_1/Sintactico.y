@@ -48,12 +48,12 @@
 %token <text> mbr
 %token <text> disk
 %token <text> igual
-%token <text> diagonal
 %token <text> extension
 %token <text> num
 %token <text> caracter
 %token <text> cadena
 %token <text> identificador
+%token <text> ruta
 
 /*----------Not terminals------------*/
 %type <nodito> INIT
@@ -67,8 +67,6 @@
 %type <nodito> PARAMETRO_M
 %type <nodito> UNMOUNT
 %type <nodito> AJUSTE
-%type <nodito> RUTA
-%type <nodito> AUX_RUTA
 %type <nodito> REP
 %type <nodito> PARAMETRO_R
 %type <nodito> SCRIPT
@@ -120,14 +118,15 @@ PARAMETRO_MK: size igual num { $$= new Nodo("size",$3); }
             |path igual cadena {
                                  $$ = new Nodo("path",$3);
                                 }
-            |path igual RUTA {
-                               $$ = new Nodo("path", "");
-                               $$->add(*$3);
+            |path igual ruta {
+                               $$ = new Nodo("path", $3);
+
                              };
 
-RMDISK: rmdisk path igual RUTA {
+RMDISK: rmdisk path igual ruta {
                                 $$ = new Nodo("RMDISK","");
-                                $$->add(*$4);
+                                Nodo *n = new Nodo("path",$4);
+                                $$->add(*n);
                                }
          | rmdisk path igual cadena {
                                       $$ = new Nodo("RMDISK","");
@@ -169,9 +168,8 @@ MOUNT: MOUNT PARAMETRO_M {
                       };
 
 PARAMETRO_M: path igual cadena { $$ = new Nodo("path",$3); }
-             | path igual RUTA {
-                                $$ = new Nodo("path", "");
-                                $$->add(*$3);
+             | path igual ruta {
+                                $$ = new Nodo("path", $3);
                                }
              | name igual identificador {
                                           $$ = new Nodo("name", $3);
@@ -194,22 +192,7 @@ AJUSTE: bf { $$ = new Nodo("ajuste", "bf"); }
         | ff { $$ = new Nodo("ajuste", "ff"); }
         | wf { $$ = new Nodo("ajuste", "wf"); };
 
-RUTA: RUTA AUX_RUTA {
-                     $$ = $1;
-                     $$->add(*$2);
-                    }
-        | AUX_RUTA { $$ = $1; } ;
 
-AUX_RUTA: diagonal identificador {
-                        $$ = new Nodo("AUX_RUTA", "");
-                        Nodo *n = new Nodo("/",$2);
-                        $$->add(*n);
-                      }
-          | diagonal identificador extension {
-                                    $$ = new Nodo("AUX_RUTA","");
-                                    Nodo *n = new Nodo($2,$3);
-                                    $$->add(*n);
-                                  };
 REP: REP PARAMETRO_R{
                      $$ = $1;
                      $$->add(*$2);
@@ -222,9 +205,8 @@ REP: REP PARAMETRO_R{
 PARAMETRO_R: name igual mbr { $$ = new Nodo("name","mbr"); }
              | name igual disk { $$ = new Nodo("name","disk"); }
              | path igual cadena{ $$ = new Nodo("path", $3); }
-             | path igual RUTA {
-                                $$ = new Nodo("path","");
-                                $$->add(*$3);
+             | path igual ruta {
+                                $$ = new Nodo("path",$3);
                                }
              | id igual identificador {
                                         $$ = new Nodo("id", $3);
@@ -235,7 +217,8 @@ SCRIPT: exec path igual cadena {
                                 Nodo *path = new Nodo("path", $4);
                                 $$->add(*path);
                                }
-        | exec path igual RUTA {
+        | exec path igual ruta {
                                  $$ = new Nodo("EXEC","");
-                                 $$->add(*$4);
+                                 Nodo *n = new Nodo("path", $4);
+                                 $$->add(*n);
                                };
