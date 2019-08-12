@@ -425,7 +425,11 @@ void recorrerREP(Nodo *raiz){
 }
 
 void recorrerEXEC(Nodo *raiz){
-
+    if(raiz->hijos.count() > 0){
+        
+    }else{
+        
+    }
 }
 
 QString getRuta(Nodo n){

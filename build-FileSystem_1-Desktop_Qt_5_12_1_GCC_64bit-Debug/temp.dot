@@ -7,7 +7,7 @@ NodoAST2[label= "/ home"];
 NodoAST1->NodoAST2;
 NodoAST3[label= "AUX_RUTA "];
 NodoAST1->NodoAST3;
-NodoAST4[label= "/ Desktop"];
+NodoAST4[label= "/ desktop"];
 NodoAST3->NodoAST4;
 NodoAST5[label= "AUX_RUTA "];
 NodoAST1->NodoAST5;

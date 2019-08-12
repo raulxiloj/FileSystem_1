@@ -15,43 +15,53 @@ id {letra}({letra}|{entero}|"_")*
 cadena "\""[^"\""]*"\""
 extension "."{id}
 
+%x COM
+
 %%
-"mkdisk"    { return mkdisk; }
-"rmdisk"    { return rmdisk; }
-"fdisk"     { return fdisk; }
-"mount"     { return mount; }
-"unmount"   { return unmount; }
-"rep"       { return rep; }
-"exec"      { return exec; }
-"-size"     { return size; }
-"-unit"     { return unit; }
-"-path"     { return path; }
-"-fit"      { return fit; }
-"-name"     { return name; }
-"-type"     { return type; }
-"-delete"   { return del; }
-"-add"      { return add; }
-"-id"       { return id; }
-"bf"        { return bf; }
-"ff"        { return ff; }
-"wf"        { return wf; }
-"Fast"      { return fast; }
-"Full"      { return full; }
-"mbr"       { return mbr; }
-"disk"      { return disk; }
+INITIAL
+{
+    "#"         { BEGIN COM; }
 
-"="         { return igual; }
-"/"         { return diagonal; }
+    "mkdisk"    { return mkdisk; }
+    "rmdisk"    { return rmdisk; }
+    "fdisk"     { return fdisk; }
+    "mount"     { return mount; }
+    "unmount"   { return unmount; }
+    "rep"       { return rep; }
+    "exec"      { return exec; }
+    "-size"     { return size; }
+    "-unit"     { return unit; }
+    "-path"     { return path; }
+    "-fit"      { return fit; }
+    "-name"     { return name; }
+    "-type"     { return type; }
+    "-delete"   { return del; }
+    "-add"      { return add; }
+    "-id"       { return id; }
+    "bf"        { return bf; }
+    "ff"        { return ff; }
+    "wf"        { return wf; }
+    "Fast"      { return fast; }
+    "Full"      { return full; }
+    "mbr"       { return mbr; }
+    "disk"      { return disk; }
 
-{entero}    {strcpy(yylval.text, yytext); return num;}
-{caracter}  {strcpy(yylval.text, yytext); return caracter;}
-{cadena}    {strcpy(yylval.text, yytext); return cadena;}
-{id}        {strcpy(yylval.text, yytext); return identificador;}
-{extension} {strcpy(yylval.text, yytext); return extension;}
 
-[[:blank:]] {}
+    "="         { return igual; }
+    "/"         { return diagonal; }
 
-.           {std::cout <<yytext <<" Error Lexico" << std::endl;}
+    {entero}    {strcpy(yylval.text, yytext); return num;}
+    {caracter}  {strcpy(yylval.text, yytext); return caracter;}
+    {cadena}    {strcpy(yylval.text, yytext); return cadena;}
+    {id}        {strcpy(yylval.text, yytext); return identificador;}
+    {extension} {strcpy(yylval.text, yytext); return extension;}
 
+    [[:blank:]] {}
+
+    .           {std::cout <<yytext <<" Error Lexico" << std::endl;}
+}
+
+<COM>"\n"  { BEGIN INITIAL; };
+<COM>.     { };
 
 %%

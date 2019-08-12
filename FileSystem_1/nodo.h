@@ -12,8 +12,10 @@ public:
     QString valor;
     int linea;
     int columna;
-    QList<Nodo> hijos;
+    int tipo_; // Este nos servirá para la ejecución, ya que aquí no hay swicht(QString); vamos a hacer un Swicht(int);
     QString cadenaDot;
+    QList<Nodo> hijos;
+    int getTipo();
     void add(Nodo n);
 };
 

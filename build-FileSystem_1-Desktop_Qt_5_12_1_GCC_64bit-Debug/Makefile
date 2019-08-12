@@ -710,7 +710,12 @@ main.o: ../FileSystem_1/main.cpp ../../../../Qt/5.12.1/gcc_64/include/QtCore/QCo
 		../../../../Qt/5.12.1/gcc_64/include/QtCore/qvarlengtharray.h \
 		../../../../Qt/5.12.1/gcc_64/include/QtCore/qcontainerfwd.h \
 		../../../../Qt/5.12.1/gcc_64/include/QtCore/qobject_impl.h \
-		../../../../Qt/5.12.1/gcc_64/include/QtCore/qeventloop.h
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/qeventloop.h \
+		../FileSystem_1/scanner.h \
+		../FileSystem_1/parser.h \
+		../FileSystem_1/graficador.h \
+		../FileSystem_1/nodo.h \
+		../../../../Qt/5.12.1/gcc_64/include/QtCore/QList
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../FileSystem_1/main.cpp
 
 nodo.o: ../FileSystem_1/nodo.cpp ../FileSystem_1/nodo.h \

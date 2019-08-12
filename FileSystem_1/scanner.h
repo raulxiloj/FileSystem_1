@@ -216,6 +216,7 @@ extern char *yytext;
 
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
+#define COM 1
 
 #endif
 
@@ -469,9 +470,9 @@ extern int yylex (void);
 #undef yyTABLES_NAME
 #endif
 
-#line 57 "Lexico.l"
+#line 67 "Lexico.l"
 
 
-#line 476 "scanner.h"
+#line 477 "scanner.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */

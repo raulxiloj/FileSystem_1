@@ -111,17 +111,17 @@ MKDISK: MKDISK PARAMETRO_MK {
                        $$->add(*$1);
                      };
 
-PARAMETRO_MK: size igual num { $$= new Nodo("Size",$3); }
+PARAMETRO_MK: size igual num { $$= new Nodo("size",$3); }
             |fit igual AJUSTE {
-                                $$ = new Nodo ("Fit", "");
+                                $$ = new Nodo ("fit", "");
                                 $$->add(*$3);
                                }
-            |unit igual caracter { $$ = new Nodo("Unit",$3); }
+            |unit igual caracter { $$ = new Nodo("unit",$3); }
             |path igual cadena {
-                                 $$ = new Nodo("Path",$3);
+                                 $$ = new Nodo("path",$3);
                                 }
             |path igual RUTA {
-                               $$ = new Nodo("Path", "");
+                               $$ = new Nodo("path", "");
                                $$->add(*$3);
                              };
 
@@ -145,8 +145,18 @@ FDISK: FDISK PARAMETRO_FK {
 
 PARAMETRO_FK: PARAMETRO_MK { $$ = $1; }
               | type igual caracter { $$ = new Nodo("type",$3); }
-              | del igual identificador { $$ = new Nodo("delete", $3); }
-              | name igual identificador { $$ = new Nodo("name", $3); }
+              | del igual fast { $$ = new Nodo("delete", "fast"); }
+              | del igual full { $$ = new Nodo("delete", "full"); }
+              | name igual identificador {
+                                           $$ = new Nodo("name", "");
+                                           Nodo *n = new Nodo("ID",$3);
+                                           $$->add(*n);
+                                         }
+              | name igual cadena {
+                                    $$ = new Nodo("name", "");
+                                    Nodo *n = new Nodo("CADENA", $3);
+                                    $$->add(*n);
+                                  }
               | add igual num { $$ = new Nodo("add", $3); };
 
 MOUNT: MOUNT PARAMETRO_M {
@@ -163,7 +173,16 @@ PARAMETRO_M: path igual cadena { $$ = new Nodo("path",$3); }
                                 $$ = new Nodo("path", "");
                                 $$->add(*$3);
                                }
-             | name igual identificador { $$ = new Nodo("name", $3); };
+             | name igual identificador {
+                                          $$ = new Nodo("name", $3);
+                                          Nodo *n = new Nodo("ID", $3);
+                                          $$->add(*n);
+                                        }
+             | name igual cadena {
+                                    $$ = new Nodo("name","");
+                                    Nodo *n = new Nodo("CADENA", $3);
+                                    $$->add(*n);
+                                 };
 
 UNMOUNT: unmount id igual identificador {
                                           $$ = new Nodo("UNMOUNT", "");
@@ -171,9 +190,9 @@ UNMOUNT: unmount id igual identificador {
                                           $$->add(*n);
                                         }
 
-AJUSTE: bf { $$ = new Nodo("Ajuste", "bf"); }
-        | ff { $$ = new Nodo("Ajuste", "ff"); }
-        | wf { $$ = new Nodo("Ajuste", "wf"); };
+AJUSTE: bf { $$ = new Nodo("ajuste", "bf"); }
+        | ff { $$ = new Nodo("ajuste", "ff"); }
+        | wf { $$ = new Nodo("ajuste", "wf"); };
 
 RUTA: RUTA AUX_RUTA {
                      $$ = $1;
