@@ -101,7 +101,7 @@ void imprimirEncabezado(){
 }
 
 void escribaUnComando(){
-    cout << "Please type some commands" << endl;
+    cout << "Por favor escriba algunos comandos:" << endl;
     while(true){
         char input[400];
         printf(">> ");
@@ -110,11 +110,11 @@ void escribaUnComando(){
         if(yyparse() == 0){
             Graficador *g = new Graficador(raiz);
             g->generarImagen();
-            cout << "Cadena correcta" << endl;
+            //cout << "Cadena correcta" << endl;
             reconocerComando(raiz);
             memset(input,0,400);
         }else{
-            cout << "Cadena incorrecta" << endl;
+            cout << "Comando no reconocido" << endl;
         }
     }
 }
@@ -231,6 +231,7 @@ void recorrerMKDISK(Nodo *raiz)
         if(flagSize  && flagPath){//Parametros obligatorios
             printf("Comando mkdisk semanticamente correcto\n");
             MBR masterboot;
+
             int total_size = 1024;
             crearArchivo(valPath);
             masterboot.mbr_date_created = time(NULL);
@@ -245,6 +246,12 @@ void recorrerMKDISK(Nodo *raiz)
                 total_size = valSize * 1024;
             }
 
+            if(flagFit){
+
+            }else{
+
+            }
+
             for(int p = 0; p < 4; p++){
                 masterboot.mbr_partition[p].part_status = '\0';
                 masterboot.mbr_partition[p].part_type = '\0';
@@ -253,7 +260,6 @@ void recorrerMKDISK(Nodo *raiz)
                 masterboot.mbr_partition[p].part_size = 0;
                 masterboot.mbr_partition[p].part_start = -1;
             }
-
             string comando = "dd if=/dev/zero of=\""+valPath.toStdString()+"\" bs=1024 count="+to_string(total_size);
             system(comando.c_str());
             FILE *fp = fopen(valPath.toStdString().c_str(),"rb+");
@@ -268,12 +274,27 @@ void recorrerMKDISK(Nodo *raiz)
 }
 
 void recorrerRMDISK(Nodo *raiz){
-    QString valPath = "";
+    QString valPath = raiz->hijos.at(0).valor;
+    valPath = valPath.replace("\"","");
 
-    if(raiz->hijos.at(0).tipo == "AUX_RUTA"){
-        valPath = getRuta(raiz->hijos.at(0));
+    FILE *fp;
+    if((fp=fopen(valPath.toStdString().c_str(),"r"))){
+        string opcion = "";
+        cout << ">> ¿Seguro que desea eliminar el disco? Y/N : ";
+
+        getline(cin,opcion);
+        if(opcion.compare("Y") == 0 || opcion.compare("y") == 0){
+            string comando = "rm \""+valPath.toStdString()+"\"";
+            system(comando.c_str());
+            cout << ">> Disco eliminado con exito" << endl;
+        }else if(opcion.compare("N") || opcion.compare("n") == 0){
+            cout << ">> Cancelado con exito" << endl;;
+        }else{
+            cout << ">> Opcion incorrecta" << endl;
+        }
+        fclose(fp);
     }else{
-        valPath = raiz->hijos.at(0).valor;
+        cout << "No existe el disco a eliminar" << endl;
     }
 
 }
@@ -519,3 +540,5 @@ QString getDireccion(QString dir){
     //res = res.substr(1,res.length());
     return QString::fromStdString(res);
 }
+
+
