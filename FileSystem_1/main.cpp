@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <iostream>
+#include <sys/stat.h>
 
 #include "scanner.h"
 #include "parser.h"
@@ -15,8 +16,10 @@ void recorrerFDISK(Nodo*);
 void recorrerMOUNT(Nodo*);
 void recorrerUNMOUNT(Nodo*);
 void recorrerREP(Nodo*);
-QString getRuta(Nodo);
+QString getRuta(Nodo); //BORRAR
+void crearArchivo(QString, QString);
 QString getDireccion(QString);
+QString getArchivo(QString);
 
 using namespace std;
 
@@ -154,7 +157,8 @@ void recorrerMKDISK(Nodo *raiz)
     QString valFit = "";
     char valUnit = 0;
     QString valPath = "";
-
+    QString direccion = "";
+    QString archivo = "";
     for(int i = 0; i < raiz->hijos.count(); i++)
     {
         Nodo n = raiz->hijos.at(i);
@@ -201,7 +205,8 @@ void recorrerMKDISK(Nodo *raiz)
             flagPath = true;
             valPath = n.valor;//Quitarle comillas si tiene
             valPath = valPath.replace("\"","");
-            QString directorio = getDireccion(valPath);
+            direccion = getDireccion(valPath);
+            archivo = getArchivo(valPath);
         }
     }
 
@@ -209,6 +214,7 @@ void recorrerMKDISK(Nodo *raiz)
         if(flagSize  && flagPath){//Parametros obligatorios
             printf("Comando mkdisk semanticamente correcto\n");
             MBR masterboot;
+            crearArchivo(direccion, archivo);
         }else{
             //ERROR
         }
@@ -445,27 +451,37 @@ QString getRuta(Nodo n){
     return "";
 }
 
-void crearArchivo(QString direccion){
-    QString comando = "sudo mkdir -p ";
-
-
+void crearArchivo(QString direccion, QString archivo){
+    string comando = "sudo mkdir -p "+direccion.toStdString();
+    system(comando.c_str());
+    string comando2 = "sudo chmod -R 777 "+direccion.toStdString();
+    system(comando2.c_str());
+    string arch = direccion.toStdString() + archivo.toStdString();
+    FILE *fp = fopen(arch.c_str(),"wb");
+    if(fp != NULL) fclose(fp);
 }
 
-QString getDireccion(QString direccion){
-    string aux = direccion.toStdString();
+QString getDireccion(QString dir){
+    string aux = dir.toStdString();
     string delimiter = "/";
     size_t pos = 0;
     string res = "";
     while((pos = aux.find(delimiter))!=string::npos){
         res += aux.substr(0,pos)+"/";
-        //cout << res << endl;
         aux.erase(0,pos + delimiter.length());
     }
-    res = res.substr(1,res.length());
-    ///cout << res << endl;
+    //res = res.substr(1,res.length());
     return QString::fromStdString(res);
 }
 
-QString getArchivo(QString){
-
+QString getArchivo(QString dir){
+    string aux = dir.toStdString();
+    string delimiter = "/";
+    size_t pos = 0;
+    string res = "";
+    while((pos = aux.find(delimiter))!=string::npos){
+        res = aux.substr(0,pos);
+        aux.erase(0,pos + delimiter.length());
+    }
+    return QString::fromStdString(aux);
 }
