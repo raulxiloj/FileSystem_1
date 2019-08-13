@@ -9,6 +9,8 @@
 extern int yyparse();
 extern Nodo *raiz; // Raiz del arbol
 
+void imprimirEncabezado();
+void escribaUnComando();
 void reconocerComando(Nodo*);
 void recorrerMKDISK(Nodo*);
 void recorrerRMDISK(Nodo*);
@@ -85,23 +87,37 @@ typedef struct{
 */
 int main()
 {
-    //char string[256] = {0};
-    char input[256];
-    printf("Please type a command: ");
-
-    fgets(input,sizeof (input),stdin);
-    YY_BUFFER_STATE buffer = yy_scan_string(input);
-    if(yyparse() == 0){
-        Graficador *g = new Graficador(raiz);
-        g->generarImagen();
-        cout << "Cadena correcta" << endl;
-        reconocerComando(raiz);
-    }else{
-        cout << "Cadena incorrecta" << endl;
-    }
+    imprimirEncabezado();
+    escribaUnComando();
     return 0;
 }
 
+void imprimirEncabezado(){
+    cout << "-----------------------------------------------------------------------------" << endl;
+    cout << "|                           Sistema de archivos                             |" << endl;
+    cout << "-----------------------------------------------------------------------------" << endl;
+    cout << "                                                       Raul Xiloj - 201612113" << endl;
+    cout << endl;
+}
+
+void escribaUnComando(){
+    cout << "Please type some commands" << endl;
+    while(true){
+        char input[400];
+        printf(">> ");
+        fgets(input,sizeof (input),stdin);
+        YY_BUFFER_STATE buffer = yy_scan_string(input);
+        if(yyparse() == 0){
+            Graficador *g = new Graficador(raiz);
+            g->generarImagen();
+            cout << "Cadena correcta" << endl;
+            reconocerComando(raiz);
+            memset(input,0,400);
+        }else{
+            cout << "Cadena incorrecta" << endl;
+        }
+    }
+}
 /*
  * Analisis semantico, recorrer el arbol
 */
@@ -215,6 +231,8 @@ void recorrerMKDISK(Nodo *raiz)
             printf("Comando mkdisk semanticamente correcto\n");
             MBR masterboot;
             crearArchivo(direccion, archivo);
+            masterboot.mbr_date_created = time(NULL);
+            masterboot.mbr_disk_signature = (int)time(NULL);
         }else{
             //ERROR
         }
