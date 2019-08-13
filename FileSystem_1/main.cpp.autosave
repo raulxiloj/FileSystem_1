@@ -470,7 +470,7 @@ void recorrerFDISK(Nodo *raiz)
                         cout << "ERROR: Parametro demas" << endl;
                     }else{
                         bool flagParticion = false;//Flag para ver si hay una particion disponible
-                        int numParticion = 0;//Que particioon es
+                        int numParticion = 0;//Que numero de particioon es
                         bool flagExtendida = false;//Flag para chequear si hay una particion extendida
                         FILE *fp;
                         MBR masterboot;
@@ -481,7 +481,7 @@ void recorrerFDISK(Nodo *raiz)
                             for(int p = 0; p < 4; p++){
                                 if(masterboot.mbr_partition[p].part_status == -1){//-----------
                                     numParticion = p;
-                                    flagParticion = true;
+                                    flagParticion = true;//....
                                 }
                             }
 
