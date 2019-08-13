@@ -19,7 +19,7 @@ void recorrerMOUNT(Nodo*);
 void recorrerUNMOUNT(Nodo*);
 void recorrerREP(Nodo*);
 QString getRuta(Nodo); //BORRAR
-void crearArchivo(QString, QString);
+void crearArchivo(QString);
 QString getDireccion(QString);
 QString getArchivo(QString);
 
@@ -186,6 +186,10 @@ void recorrerMKDISK(Nodo *raiz)
             }
             flagSize = true;
             valSize = n.valor.toInt();
+            if(!(valSize > 0)){
+                printf("Size tendria que ser mayor a cero");
+                break;
+            }
         }else if(n.tipo_ == FIT){
             if(flagFit){
                 printf("ERROR: Parametro fit ya agreagdo\n");
@@ -217,22 +221,45 @@ void recorrerMKDISK(Nodo *raiz)
                 flag = true;
                 break; //ERROR
             }
-
             flagPath = true;
             valPath = n.valor;//Quitarle comillas si tiene
             valPath = valPath.replace("\"","");
-            direccion = getDireccion(valPath);
-            archivo = getArchivo(valPath);
         }
     }
 
-    if(!flag){
+    if(!flag){//Flag para ver si hay parametros repetidos
         if(flagSize  && flagPath){//Parametros obligatorios
             printf("Comando mkdisk semanticamente correcto\n");
             MBR masterboot;
-            crearArchivo(direccion, archivo);
+            int total_size = 1024;
+            crearArchivo(valPath);
             masterboot.mbr_date_created = time(NULL);
             masterboot.mbr_disk_signature = (int)time(NULL);
+            if(flagUnit){//Si hay parametro unit
+                if(valUnit == 'm'){
+                    masterboot.mbr_size = valSize * 1048576;
+                    total_size = valSize * 1024;
+                }
+            }else{
+                masterboot.mbr_size = valSize*1048576;
+                total_size = valSize * 1024;
+            }
+
+            for(int p = 0; p < 4; p++){
+                masterboot.mbr_partition[p].part_status = '\0';
+                masterboot.mbr_partition[p].part_type = '\0';
+                masterboot.mbr_partition[p].part_fit = '\0';
+                strcpy(masterboot.mbr_partition[p].part_name,"");
+                masterboot.mbr_partition[p].part_size = 0;
+                masterboot.mbr_partition[p].part_start = -1;
+            }
+
+            string comando = "dd if=/dev/zero of=\""+valPath.toStdString()+"\" bs=1024 count="+to_string(total_size);
+            system(comando.c_str());
+            FILE *fp = fopen(valPath.toStdString().c_str(),"rb+");
+            fseek(fp,0,SEEK_SET);
+            fwrite(&masterboot,sizeof(MBR),1,fp);
+            fclose(fp);
         }else{
             //ERROR
         }
@@ -469,12 +496,13 @@ QString getRuta(Nodo n){
     return "";
 }
 
-void crearArchivo(QString direccion, QString archivo){
-    string comando = "sudo mkdir -p "+direccion.toStdString();
+void crearArchivo(QString direccion){
+    QString aux = getDireccion(direccion);
+    string comando = "sudo mkdir -p "+aux.toStdString();
     system(comando.c_str());
-    string comando2 = "sudo chmod -R 777 "+direccion.toStdString();
+    string comando2 = "sudo chmod -R 777 "+aux.toStdString();
     system(comando2.c_str());
-    string arch = direccion.toStdString() + archivo.toStdString();
+    string arch = direccion.toStdString();
     FILE *fp = fopen(arch.c_str(),"wb");
     if(fp != NULL) fclose(fp);
 }
@@ -490,16 +518,4 @@ QString getDireccion(QString dir){
     }
     //res = res.substr(1,res.length());
     return QString::fromStdString(res);
-}
-
-QString getArchivo(QString dir){
-    string aux = dir.toStdString();
-    string delimiter = "/";
-    size_t pos = 0;
-    string res = "";
-    while((pos = aux.find(delimiter))!=string::npos){
-        res = aux.substr(0,pos);
-        aux.erase(0,pos + delimiter.length());
-    }
-    return QString::fromStdString(aux);
 }
