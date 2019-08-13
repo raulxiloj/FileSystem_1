@@ -22,6 +22,7 @@ QString getRuta(Nodo); //BORRAR
 void crearArchivo(QString);
 QString getDireccion(QString);
 QString getArchivo(QString);
+bool existePLogica(QString, QString);
 
 using namespace std;
 
@@ -180,19 +181,19 @@ void recorrerMKDISK(Nodo *raiz)
         Nodo n = raiz->hijos.at(i);
         if(n.tipo_ == SIZE){
             if(flagSize){
-                printf("ERROR: Parametro size ya agreagdo\n");
+                cout << "ERROR: Parametro -size ya agregado" << endl;
                 flag = true;
                 break; //ERROR
             }
             flagSize = true;
             valSize = n.valor.toInt();
             if(!(valSize > 0)){
-                printf("Size tendria que ser mayor a cero");
+                cout << "ERROR: Parametro -size menor a cero" << endl;
                 break;
             }
         }else if(n.tipo_ == FIT){
             if(flagFit){
-                printf("ERROR: Parametro fit ya agreagdo\n");
+                cout << "ERROR: Parametro -fit ya agreagdo" << endl;
                 flag = true;
                 break; //ERROR
             }
@@ -200,7 +201,7 @@ void recorrerMKDISK(Nodo *raiz)
             valFit = n.valor;
         }else if(n.tipo_ == UNIT){
             if(flagUnit){
-                printf("ERROR: Parametro unit ya agreagdo\n");
+                cout << "ERROR: Parametro -unit ya agreagdo" << endl;
                 flag = true;
                 break;// ERROR;
             }
@@ -212,14 +213,14 @@ void recorrerMKDISK(Nodo *raiz)
             }else if(valUnit == 'm' || valUnit == 'M'){
                 valUnit = 'm';
             }else{
-                printf("ERROR: Valor del parametro unit no reconocido");
+                cout << "ERROR: Valor del parametro -unit no reconocido" << endl;
                 break;
             }
         }else if(n.tipo_ == PATH){
             if(flagPath){
-                printf("ERROR: Parametro path ya agreagdo\n");
+                cout << "ERROR: Parametro -path ya agreagdo" << endl;
                 flag = true;
-                break; //ERROR
+                break;
             }
             flagPath = true;
             valPath = n.valor;//Quitarle comillas si tiene
@@ -299,6 +300,7 @@ void recorrerRMDISK(Nodo *raiz){
 }
 
 void recorrerFDISK(Nodo *raiz){
+
     bool flagSize = false;
     bool flagUnit = false;
     bool flagPath = false;
@@ -308,11 +310,14 @@ void recorrerFDISK(Nodo *raiz){
     bool flagName = false;
     bool flagAdd = false;
     bool flag = false;
+
     int valSize = 0;
     char valUnit = 0;
+    char valType = 0;
     QString valPath = "";
     QString valName = "";
-    char valType = 0;
+    QString valFit = "";
+
     for(int i = 0; i < raiz->hijos.count(); i++)
     {
         Nodo n = raiz->hijos.at(i);
@@ -400,7 +405,17 @@ void recorrerFDISK(Nodo *raiz){
                 //ERROR
                 break;
             }
+            //valFit
+
             flagFit = true;
+            valFit = n.hijos.at(0).valor;
+            if(valFit == "bf"){
+                valFit = "BF";
+            }else if(valFit == "ff"){
+                valFit = "FF";
+            }else if(valFit == "wf"){
+                valFit = "WF";
+            }
         }
             break;
         case DELETE:
@@ -437,7 +452,7 @@ void recorrerFDISK(Nodo *raiz){
                 //ERROR
                 break;
             }
-            flagName = true;
+            flagAdd = true;
         }
             break;
 
@@ -453,16 +468,17 @@ void recorrerFDISK(Nodo *raiz){
                     if(flagDelete || flagAdd){
                         cout << "ERROR: Parametro demas" << endl;
                     }else{
-                        int numeroParticion = 0;
-                        bool flagParticion = false;
+                        bool flagParticion = false;//Flag para ver si hay una particion disponible
+                        int numeroParticion = 0;//Que particioon es
+                        bool flagExtendida = false;//Flag para chequear si hay una particion extendida
                         FILE *fp;
                         MBR masterboot;
                         if((fp = fopen(auxPath.c_str(),"rb+"))){
                             fseek(fp,0,SEEK_SET);
                             fread(&masterboot,sizeof(MBR),1,fp);
-                            /*--------Ver que particion esta libre--------*/
+                            //Revisar si alguna particion esta libre
                             for(int p = 0; p < 4; p++){
-                                if(masterboot.mbr_partition[p].part_status == -1){
+                                if(masterboot.mbr_partition[p].part_status == -1){//-----------
                                     numeroParticion = p;
                                     flagParticion = true;
                                 }
@@ -473,9 +489,15 @@ void recorrerFDISK(Nodo *raiz){
                                 cout << "ERROR: Ya existen 4 particiones, no se puede crear otra" << endl;
                                 cout << "Elimine alguna para poder crear una" << endl;
                             }else{//Es un particion logica :o
+                                if(!existePLogica(valPath,valName)){
+                                    //Ver si ya hay una particion extendida
 
+                                }else{
+                                    cout << "Ya existe una particion con ese nombre" << endl;
+                                }
 
                             }
+                            fclose(fp);
                         }else{
                             cout << "ERROR no existe el disco" << endl;
                         }
@@ -500,6 +522,7 @@ void recorrerFDISK(Nodo *raiz){
 
                                 }
                             }
+                            fclose(fp);
                         }
                     }
                 }
@@ -639,7 +662,7 @@ QString getDireccion(QString dir){
     return QString::fromStdString(res);
 }
 
-bool verificarPLogicas(QString direccion, QString nombre){
+bool existePLogica(QString direccion, QString nombre){
     int particionE = 0;
     FILE *fp = fopen(direccion.toStdString().c_str(),"rb+");
     fseek(fp,0,SEEK_SET);
@@ -658,6 +681,14 @@ bool verificarPLogicas(QString direccion, QString nombre){
     if(particionE!=-1){
         fseek(fp,masterboot.mbr_partition[particionE].part_start,SEEK_SET);
         EBR extendedboot;
+        while((fread(&extendedboot,sizeof(EBR),1,fp)!=0)){
+            if(strcmp(extendedboot.part_name,nombre.toStdString().c_str()) == 0){
+                return true;
+            }
+            if(extendedboot.part_next == -1){
+                break;
+            }
+        }
     }
     return false;
 }

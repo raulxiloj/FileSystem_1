@@ -9,7 +9,7 @@
 
 /*Regular expresions*/
 letra [a-zA-Z]
-entero [0-9]+
+entero ("-")?[0-9]+
 caracter ({letra}|{entero})
 id {letra}({letra}|{entero}|"_")*
 cadena "\""[^"\""]*"\""
