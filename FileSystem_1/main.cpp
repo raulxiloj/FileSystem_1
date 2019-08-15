@@ -9,8 +9,10 @@
 extern int yyparse();
 extern Nodo *raiz; // Raiz del arbol
 
+#define oneMB = 1048576
+
 void imprimirEncabezado();
-void escribaUnComando();
+[[ noreturn ]] void escribaUnComando() ;
 void reconocerComando(Nodo*);
 void recorrerMKDISK(Nodo*);
 void recorrerRMDISK(Nodo*);
@@ -18,11 +20,14 @@ void recorrerFDISK(Nodo*);
 void recorrerMOUNT(Nodo*);
 void recorrerUNMOUNT(Nodo*);
 void recorrerREP(Nodo*);
-QString getRuta(Nodo); //BORRAR
 void crearArchivo(QString);
+void crearParticionPrimaria(QString, QString, int, char, char);
+void crearParticionExtendida();
+void crearParticionLogica();
+QString getDirectorio(QString);
 QString getDireccion(QString);
 QString getArchivo(QString);
-bool existePLogica(QString, QString);
+bool existeParticion(QString, QString);
 
 using namespace std;
 
@@ -53,7 +58,7 @@ enum Choice
 
 /*
     Structs necesarios para guardar la informacion de los discos
-    Los discos tendran informacion del MBR y espacio con particiones
+    Los discos tendran informacion del MBR y el MBR tendra el espacio de las particiones
 */
 
 typedef struct {
@@ -82,7 +87,15 @@ typedef struct{
     char part_name[16]; //Nombre de la particion
 }EBR;
 
+struct Node{
+    char direccion[400];
+    char nombre[100];
+    struct Node *siguiente;
+    struct Node *anterior;
+};
 
+struct Node *primero = NULL;
+struct Node *ultimo = NULL;
 /*
     FUNCION PRINCIPAL
 */
@@ -90,7 +103,6 @@ int main()
 {
     imprimirEncabezado();
     escribaUnComando();
-    return 0;
 }
 
 void imprimirEncabezado(){
@@ -119,6 +131,7 @@ void escribaUnComando(){
         }
     }
 }
+
 /*
  * Analisis semantico, recorrer el arbol
 */
@@ -173,14 +186,16 @@ void recorrerMKDISK(Nodo *raiz)
     bool flag = false;//Si se repite un valor se activa esta bandera
     /*Variables para obtener los valores de cada nodo*/
     int valSize = 0;
-    QString valFit = "";
+    char valFit = 0;
     char valUnit = 0;
     QString valPath = "";
 
     for(int i = 0; i < raiz->hijos.count(); i++)
     {
         Nodo n = raiz->hijos.at(i);
-        if(n.tipo_ == SIZE){
+        switch (n.tipo_) {
+        case SIZE:
+        {
             if(flagSize){
                 cout << "ERROR: Parametro -size ya definido" << endl;
                 flag = true;
@@ -189,18 +204,32 @@ void recorrerMKDISK(Nodo *raiz)
             flagSize = true;
             valSize = n.valor.toInt();
             if(!(valSize > 0)){
+                flag = true;
                 cout << "ERROR: Parametro -size menor a cero" << endl;
                 break;
             }
-        }else if(n.tipo_ == FIT){
+        }
+            break;
+        case FIT:
+        {
             if(flagFit){
                 cout << "ERROR: Parametro -fit ya definido" << endl;
                 flag = true;
                 break; //ERROR
             }
             flagFit = true;
-            valFit = n.valor;
-        }else if(n.tipo_ == UNIT){
+            valFit = n.valor.toStdString()[0];
+            if(valFit == 'b'){
+                valFit = 'B';
+            }else if(valFit == 'f'){
+                valFit = 'F';
+            }else if(valFit == 'w'){
+                valFit = 'W';
+            }
+        }
+            break;
+        case UNIT:
+        {
             if(flagUnit){
                 cout << "ERROR: Parametro -unit ya definido" << endl;
                 flag = true;
@@ -215,9 +244,13 @@ void recorrerMKDISK(Nodo *raiz)
                 valUnit = 'm';
             }else{
                 cout << "ERROR: Valor del parametro -unit no reconocido" << endl;
+                flag = true;
                 break;
             }
-        }else if(n.tipo_ == PATH){
+        }
+            break;
+        case PATH:
+        {
             if(flagPath){
                 cout << "ERROR: Parametro -path ya definido" << endl;
                 flag = true;
@@ -227,47 +260,60 @@ void recorrerMKDISK(Nodo *raiz)
             valPath = n.valor;//Quitarle comillas si tiene
             valPath = valPath.replace("\"","");
         }
+            break;
+
+        }
+
     }
 
     if(!flag){//Flag para ver si hay parametros repetidos
-        if(flagSize  && flagPath){//Parametros obligatorios
-            printf("Comando mkdisk semanticamente correcto\n");
-            MBR masterboot;
+        if(flagPath){//Parametro path obligatorio
+            if(flagSize){//Parametro size obligatorio
+                MBR masterboot;
+                int total_size = 1024;
+                crearArchivo(valPath);
+                masterboot.mbr_date_created = time(nullptr);//-------
+                masterboot.mbr_disk_signature = (int)time(nullptr);//--------
 
-            int total_size = 1024;
-            crearArchivo(valPath);
-            masterboot.mbr_date_created = time(NULL);
-            masterboot.mbr_disk_signature = (int)time(NULL);
-            if(flagUnit){//Si hay parametro unit
-                if(valUnit == 'm'){
-                    masterboot.mbr_size = valSize * 1048576;
+                if(flagUnit){//Si hay parametro unit
+                    if(valUnit == 'm'){
+                        masterboot.mbr_size = valSize*1048576;
+                        total_size = valSize * 1024;
+                    }else{
+                        masterboot.mbr_size = valSize * 1024;
+                        total_size = valSize;
+                    }
+                }else{
+                    masterboot.mbr_size = valSize*1048576;
                     total_size = valSize * 1024;
                 }
+
+                if(flagFit)//Si hay parametro fit
+                    masterboot.mbr_disk_fit = valFit;
+                else
+                    masterboot.mbr_disk_fit = 'F';
+
+                //Se inicializan las particiones en el MBR
+                for(int p = 0; p < 4; p++){
+                    masterboot.mbr_partition[p].part_status = 0;
+                    masterboot.mbr_partition[p].part_type = 0;
+                    masterboot.mbr_partition[p].part_fit = 0;
+                    masterboot.mbr_partition[p].part_size = 0;
+                    masterboot.mbr_partition[p].part_start = -1;
+                    strcpy(masterboot.mbr_partition[p].part_name,"");
+                }
+
+                //Comando para genera un archivo de cierto tamano
+                string comando = "dd if=/dev/zero of=\""+valPath.toStdString()+"\" bs=1024 count="+to_string(total_size);
+                system(comando.c_str());
+                FILE *fp = fopen(valPath.toStdString().c_str(),"rb+");
+                fseek(fp,0,SEEK_SET);
+                fwrite(&masterboot,sizeof(MBR),1,fp);
+                fclose(fp);
             }else{
-                masterboot.mbr_size = valSize*1048576;
-                total_size = valSize * 1024;
+                cout << "Parametro -size no definido " << endl;
             }
 
-            if(flagFit){
-
-            }else{
-
-            }
-
-            for(int p = 0; p < 4; p++){
-                masterboot.mbr_partition[p].part_status = '\0';
-                masterboot.mbr_partition[p].part_type = '\0';
-                masterboot.mbr_partition[p].part_fit = '\0';
-                strcpy(masterboot.mbr_partition[p].part_name,"");
-                masterboot.mbr_partition[p].part_size = 0;
-                masterboot.mbr_partition[p].part_start = -1;
-            }
-            string comando = "dd if=/dev/zero of=\""+valPath.toStdString()+"\" bs=1024 count="+to_string(total_size);
-            system(comando.c_str());
-            FILE *fp = fopen(valPath.toStdString().c_str(),"rb+");
-            fseek(fp,0,SEEK_SET);
-            fwrite(&masterboot,sizeof(MBR),1,fp);
-            fclose(fp);
         }else{
             cout << "ERROR: Se esperaban mas parametros" << endl;
         }
@@ -287,11 +333,11 @@ void recorrerRMDISK(Nodo *raiz)
         if(opcion.compare("Y") == 0 || opcion.compare("y") == 0){
             string comando = "rm \""+valPath.toStdString()+"\"";
             system(comando.c_str());
-            cout << ">> Disco eliminado con exito" << endl;
+            cout << "Disco eliminado con exito" << endl;
         }else if(opcion.compare("N") || opcion.compare("n") == 0){
-            cout << ">> Cancelado con exito" << endl;;
+            cout << "Cancelado con exito" << endl;;
         }else{
-            cout << ">> Opcion incorrecta" << endl;
+            cout << "Opcion incorrecta" << endl;
         }
         fclose(fp);
     }else{
@@ -315,9 +361,10 @@ void recorrerFDISK(Nodo *raiz)
     int valSize = 0;
     char valUnit = 0;
     char valType = 0;
+    char valFit = 0;
     QString valPath = "";
     QString valName = "";
-    QString valFit = "";
+
 
     for(int i = 0; i < raiz->hijos.count(); i++)
     {
@@ -406,16 +453,14 @@ void recorrerFDISK(Nodo *raiz)
                 flag = true;
                 //ERROR
             }
-            //valFit
-
             flagFit = true;
-            valFit = n.hijos.at(0).valor;
-            if(valFit == "bf"){
-                valFit = "BF";
-            }else if(valFit == "ff"){
-                valFit = "FF";
-            }else if(valFit == "wf"){
-                valFit = "WF";
+            valFit = n.hijos.at(0).valor.toStdString()[0];
+            if(valFit == 'b'){
+                valFit = 'B';
+            }else if(valFit == 'f'){
+                valFit = 'F';
+            }else if(valFit == 'w'){
+                valFit = 'W';
             }
         }
             break;
@@ -456,75 +501,37 @@ void recorrerFDISK(Nodo *raiz)
             flagAdd = true;
         }
             break;
-
-
         }
     }
 
-    if(!flag){
-        if(flagPath){
-            string auxPath = valPath.toStdString();
-            if(flagName){
-                if(flagSize){
+    if(!flag){//Flag para ver si hay parametros repetidos
+        if(flagPath){//Parametro obligatorio
+            if(flagName){//Parametro obligatorio
+                if(flagSize){//Parametro obligatorio al crear una particion
                     if(flagDelete || flagAdd){
-                        cout << "ERROR: Parametro demas" << endl;
+                        cout << "ERROR: Parametro -delete|-add demas" << endl;
                     }else{
-                        bool flagParticion = false;//Flag para ver si hay una particion disponible
-                        int numParticion = 0;//Que particioon es
-                        bool flagExtendida = false;//Flag para chequear si hay una particion extendida
-                        FILE *fp;
-                        MBR masterboot;
-                        if((fp = fopen(auxPath.c_str(),"rb+"))){
-                            fseek(fp,0,SEEK_SET);
-                            fread(&masterboot,sizeof(MBR),1,fp);
-                            //Revisar si alguna particion esta libre
-                            for(int p = 0; p < 4; p++){
-                                if(masterboot.mbr_partition[p].part_status == -1){//-----------
-                                    numParticion = p;
-                                    flagParticion = true;
-                                }
+                        if(flagType){//Si especifica tipo de particion
+                            if(valType == 'P'){
+                                crearParticionPrimaria(valPath, valName, valSize, valFit, valUnit);
+                            }else if(valType == 'E'){
+                                crearParticionExtendida();
+                            }else if(valType == 'L'){
+                                crearParticionLogica();
                             }
-
-                            /*-----Verificar particiones-------*/
-                            if(!flagParticion && valType != 'L'){
-                                cout << "ERROR: Ya existen 4 particiones, no se puede crear otra" << endl;
-                                cout << "Elimine alguna para poder crear una" << endl;
-                            }else{//Es un particion logica :o
-                                if(!existePLogica(valPath,valName)){
-                                    //Ver si ya hay una particion extendida
-
-                                }else{
-                                    cout << "Ya existe una particion con ese nombre" << endl;
-                                }
-
-                            }
-                            fclose(fp);
-                        }else{
-                            cout << "ERROR no existe el disco" << endl;
+                        }else{//Si no especifica se considera particion primaria
+                            crearParticionPrimaria(valPath, valName, valSize, valFit, valUnit);
                         }
                     }
                 }else if(flagAdd){
                     if(flagSize || flagDelete){
-                        cout << "ERROR: Parametros demas" << endl;
+                        cout << "ERROR: Parametros -size|-delete demas" << endl;
                     }
                 }else if(flagDelete){
                     if(flagSize || flagAdd || flagFit || flagType){
                         cout << "ERROR: Parametros demas" << endl;
                     }else{
-                        FILE *fp;
-                        if((fp=fopen(auxPath.c_str(),"rb+"))){
-                            fseek(fp,0,SEEK_SET);
-                            MBR masterboot;
-                            fread(&masterboot,sizeof(MBR),1,fp);
-                            /*--------Buscamos una particion primaria-------*/
-                            string auxName = valName.toStdString();
-                            for(int i = 0; i < 4; i++){
-                                if(strcmp(masterboot.mbr_partition[i].part_name,auxName.c_str()) == 0 && masterboot.mbr_partition[i].part_status == '1'){
 
-                                }
-                            }
-                            fclose(fp);
-                        }
                     }
                 }
             }else {
@@ -639,19 +646,30 @@ void recorrerEXEC(Nodo *raiz){
     }
 }
 
+/*
+ * Metodo que creara el directorio de carpetas hacia el archivo
+ * dara permisos en las carpetas y creara el archivo.
+ *@param QString direccion, ruta en donde se creara el archivo
+*/
 void crearArchivo(QString direccion){
-    QString aux = getDireccion(direccion);
+    QString aux = getDirectorio(direccion);
     string comando = "sudo mkdir -p "+aux.toStdString();
     system(comando.c_str());
     string comando2 = "sudo chmod -R 777 "+aux.toStdString();
     system(comando2.c_str());
     string arch = direccion.toStdString();
     FILE *fp = fopen(arch.c_str(),"wb");
-    if(fp != NULL) fclose(fp);
+    if((fp = fopen(arch.c_str(),"wb")))
+        fclose(fp);
+    else
+        cout << "Error al crear el archivo" << endl;
 }
 
-QString getDireccion(QString dir){
-    string aux = dir.toStdString();
+/* Funcion que devuleve la ruta en donde se creara el archivo
+ * @param QString direccion: ruta donde se creara el archivo
+*/
+QString getDirectorio(QString direccion){
+    string aux = direccion.toStdString();
     string delimiter = "/";
     size_t pos = 0;
     string res = "";
@@ -659,11 +677,21 @@ QString getDireccion(QString dir){
         res += aux.substr(0,pos)+"/";
         aux.erase(0,pos + delimiter.length());
     }
-    //res = res.substr(1,res.length());
     return QString::fromStdString(res);
 }
 
-bool existePLogica(QString direccion, QString nombre){
+QString getDireccion(QString id){
+
+}
+
+
+
+
+/* Funcion que devuelve un booleano para comprobar la existencia de una particion
+ * @param QString direccion: ruta del archivo
+ * @param QString nombre: nombre de la particion
+*/
+bool existeParticion(QString direccion, QString nombre){
     int particionE = 0;
     FILE *fp = fopen(direccion.toStdString().c_str(),"rb+");
     fseek(fp,0,SEEK_SET);
@@ -692,4 +720,160 @@ bool existePLogica(QString direccion, QString nombre){
         }
     }
     return false;
+}
+
+void crearParticionPrimaria(QString direccion, QString nombre, int size, char fit, char unit){
+    char auxFit = 0;
+    char auxUnit = 0;
+    string auxPath = direccion.toStdString();
+    int size_bytes = 1024;
+    char buffer = '1';
+
+    if(fit != 0)
+        auxFit = fit;
+    else
+        auxFit = 'W';
+
+    if(unit != 0){
+        auxUnit = unit;
+        if(auxUnit == 'b'){
+            size_bytes = size;
+        }else if(auxUnit == 'k'){
+            size_bytes = size * 1024;
+        }else{
+            size_bytes = size_bytes*1024*1024;
+        }
+    }else{
+        size_bytes = size * 1024;
+    }
+
+    FILE *fp;
+    MBR masterboot;
+
+    if((fp = fopen(auxPath.c_str(), "rb+"))){
+        bool flagParticion = false;//Flag para ver si hay una particion disponible
+        int numParticion = 0;//Que numero de particion es
+        fseek(fp,0,SEEK_SET);
+        fread(&masterboot,sizeof(MBR),1,fp);
+        //Verificar si existe una particion disponible
+        for(int i = 0; i < 4; i++){
+            if(masterboot.mbr_partition[i].part_status == 0){
+                flagParticion = true;
+                numParticion = i;
+                break;
+            }
+        }
+
+        if(flagParticion){
+            //Verificar el espacio libre del disco
+            int espacioUsado = 0;
+            for(int i = 0; i < 4; i++){
+                espacioUsado += espacioUsado + masterboot.mbr_partition[i].part_size;
+            }
+            cout << "Espacio disponible: " << (masterboot.mbr_size - espacioUsado) << endl;
+            cout << "..." << endl;
+            //Verificar que haya espacio suficiente para crear la particion
+            if((masterboot.mbr_size - espacioUsado) > size_bytes){
+                if(!(existeParticion(direccion,nombre))){
+                    if(masterboot.mbr_disk_fit == 'F'){
+                        masterboot.mbr_partition[numParticion].part_type = 'P';
+                        masterboot.mbr_partition[numParticion].part_fit = auxFit;
+                        //start
+                        if(numParticion == 0){
+                            masterboot.mbr_partition[numParticion].part_start = sizeof(masterboot);
+                        }else{//CHECK THIS ONE
+                            masterboot.mbr_partition[numParticion].part_start = masterboot.mbr_partition[numParticion-1].part_size + masterboot.mbr_partition[numParticion].part_start;
+                        }
+                        masterboot.mbr_partition[numParticion].part_size = size_bytes;
+                        masterboot.mbr_partition[numParticion].part_status = 1;
+                        strcpy(masterboot.mbr_partition[numParticion].part_name,nombre.toStdString().c_str());
+                        //Se guarda de nuevo el MBR
+                        fseek(fp,0,SEEK_SET);
+                        fwrite(&masterboot,sizeof(MBR),1,fp);
+                        //Se guarda la particion
+                        fseek(fp,masterboot.mbr_partition[numParticion].part_start,SEEK_SET);
+                        for(int i = 0; i < size_bytes; i++){
+                            fwrite(&buffer,1,1,fp);
+                        }
+                        cout << "Particion creada con exito" << endl;
+                    }else if(masterboot.mbr_disk_fit == 'B'){
+
+                    }else if(masterboot.mbr_disk_fit == 'W'){
+
+                    }
+                }else{
+                    cout << "ERROR ya existe una particion con ese nombre" << endl;
+                }
+
+            }else{
+                cout << "ERROR la particion a crear excede el tamano libre" << endl;
+            }
+
+            //Verificar si ya existe una particion con ese nombre
+            if(existeParticion(direccion,nombre)){
+                 cout << "Ya existe una particion con ese nombre" << endl;
+            }else{
+
+            }
+        }else{
+            cout << "ERROR: Ya existen 4 particiones, no se puede crear otra" << endl;
+            cout << "Elimine alguna para poder crear una" << endl;
+        }
+
+    }else{
+        cout << "ERROR no existe el disco" << endl;
+    }
+}
+
+void crearParticionExtendida(string direccion, QString nombre, int size, bool fit){
+    bool flagParticion = false; //Flag para ver si hay una particion disponible
+    bool flagExtendida = false; //Flag para ver si ya existe una particion extendida
+
+    FILE *fp;
+    MBR masterboot;
+    /*
+    if((fp = fopen(auxPath.c_str(),"rb+"))){
+        fseek(fp,0,SEEK_SET);
+        fread(&masterboot,sizeof(MBR),1,fp);
+        //Verificar si ya existe una P.E.
+        for(int e = 0; e < 4; e++){
+            if(masterboot.mbr_partition[e].part_type == 'E'){
+                flagExtendida = true;
+                break;
+            }
+        }
+
+        if(flagExtendida){
+            cout << "ERROR ya existe una particion extendida" << endl;
+        }else{
+            //Verificar si hay  alguna particion disponible
+            for(int p = 0; p < 4; p++){
+                if(masterboot.mbr_partition[p].part_start == -1){//Arreglar condicion
+                    flagExtendida = true;
+                    break;
+                }
+            }
+        }
+    }else{
+        cout << "ERROR no existe el disco" << endl;
+    }
+    */
+}
+
+void crearParticionLogica(){
+    bool flagExtendida = false;
+
+    FILE *fp;
+    MBR masterboot;
+    /*
+    if((fp = fopen(auxPath.c_str(),"rb+"))){
+
+    }else{
+        cout << "ERROR no existe el disco" << endl;
+    }
+    */
+}
+
+void graficarDisco(QString direccion, QString destino){
+
 }
