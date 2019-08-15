@@ -146,16 +146,8 @@ PARAMETRO_FK: PARAMETRO_MK { $$ = $1; }
               | type igual caracter { $$ = new Nodo("type",$3); }
               | del igual fast { $$ = new Nodo("delete", "fast"); }
               | del igual full { $$ = new Nodo("delete", "full"); }
-              | name igual identificador {
-                                           $$ = new Nodo("name", "");
-                                           Nodo *n = new Nodo("ID",$3);
-                                           $$->add(*n);
-                                         }
-              | name igual cadena {
-                                    $$ = new Nodo("name", "");
-                                    Nodo *n = new Nodo("CADENA", $3);
-                                    $$->add(*n);
-                                  }
+              | name igual identificador { $$ = new Nodo("name", $3); }
+              | name igual cadena { $$ = new Nodo("name", $3); }
               | add igual num { $$ = new Nodo("add", $3); };
 
 MOUNT: MOUNT PARAMETRO_M {
@@ -168,19 +160,9 @@ MOUNT: MOUNT PARAMETRO_M {
                       };
 
 PARAMETRO_M: path igual cadena { $$ = new Nodo("path",$3); }
-             | path igual ruta {
-                                $$ = new Nodo("path", $3);
-                               }
-             | name igual identificador {
-                                          $$ = new Nodo("name", $3);
-                                          Nodo *n = new Nodo("ID", $3);
-                                          $$->add(*n);
-                                        }
-             | name igual cadena {
-                                    $$ = new Nodo("name","");
-                                    Nodo *n = new Nodo("CADENA", $3);
-                                    $$->add(*n);
-                                 };
+             | path igual ruta { $$ = new Nodo("path", $3); }
+             | name igual identificador { $$ = new Nodo("name", $3); }
+             | name igual cadena { $$ = new Nodo("name",$3); };
 
 UNMOUNT: unmount id igual identificador {
                                           $$ = new Nodo("UNMOUNT", "");

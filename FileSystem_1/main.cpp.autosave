@@ -577,7 +577,7 @@ void recorrerMOUNT(Nodo *raiz){
 
     if(flagPath){//Parametro obligatorio
         if(flagName){//Parametro obligtaorio
-
+            
         }else{
             cout << "ERROR parametro -name no definido" << endl;
         }
