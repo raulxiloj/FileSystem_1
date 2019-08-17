@@ -12,8 +12,6 @@ public:
     char letra;
     int num;
     NodoMount *siguiente;
-    NodoMount *anterior;
-    void insertar();
 };
 
 #endif // NODOMOUNT_H

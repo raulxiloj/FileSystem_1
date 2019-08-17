@@ -6,8 +6,9 @@
 class ListaMount
 {
 public:
-    NodoMount *raiz;
+    NodoMount *primero;
     ListaMount();
+    int buscarLetra(QString direccion, QString nombre);
     void insertarNodo(NodoMount*);
 };
 
