@@ -5,6 +5,7 @@
 #include "scanner.h"
 #include "parser.h"
 #include "graficador.h"
+#include "listamount.h"
 
 extern int yyparse();
 extern Nodo *raiz; // Raiz del arbol
@@ -23,10 +24,12 @@ void crearParticionPrimaria(QString, QString, int, char, char);
 void crearParticionExtendida(QString, QString, int, char, char);
 void crearParticionLogica(QString, QString, int, char, char);
 void eliminarParticion(QString, QString, QString);
+void agregarQuitarParticion(QString, QString ,int ,char);
 QString getDirectorio(QString);
 QString getDireccion(QString);
 bool existeParticion(QString, QString);
-bool buscarParticion_P_E(QString, QString);
+int buscarParticion_P_E(QString, QString);
+int buscarParticion_L(QString, QString);
 
 using namespace std;
 
@@ -86,16 +89,8 @@ typedef struct{
     char part_name[16]; //Nombre de la particion
 }EBR;
 
-/* Struct para hacer una lista y montar las particiones */
-struct Node{
-    char direccion[400];
-    char nombre[100];
-    struct Node *siguiente;
-    struct Node *anterior;
-};
+ListaMount *lista = new ListaMount();
 
-struct Node *primero = nullptr;
-struct Node *ultimo = nullptr;
 /*
     FUNCION PRINCIPAL
 */
@@ -363,6 +358,7 @@ void recorrerFDISK(Nodo *raiz)
     bool flag = false;
     /*Variables para obtener los valores de cada nodo*/
     int valSize = 0;
+    int valAdd = 0;
     char valUnit = 0;
     char valType = 0;
     char valFit = 0;
@@ -499,6 +495,7 @@ void recorrerFDISK(Nodo *raiz)
                 break;
             }
             flagAdd = true;
+            valAdd = n.valor.toInt();
         }
             break;
         }
@@ -526,7 +523,9 @@ void recorrerFDISK(Nodo *raiz)
                 }else if(flagAdd){
                     if(flagSize || flagDelete){
                         cout << "ERROR: Parametros -size|-delete demas" << endl;
-                    }   
+                    }else{
+                        agregarQuitarParticion(valPath,valName,valAdd,valUnit);
+                    }
                 }else if(flagDelete){
                     if(flagSize || flagAdd || flagFit || flagType){
                         cout << "ERROR: Parametros demas" << endl;
@@ -580,15 +579,34 @@ void recorrerMOUNT(Nodo *raiz){
         }
     }
 
-    if(flagPath){//Parametro obligatorio
-        if(flagName){//Parametro obligtaorio
-            //bool flagParticion = buscarParticion_P_E(valPath,valName); //flag para saber si existe la particion
+    if(!flag){
+        if(flagPath){//Parametro obligatorio
+            if(flagName){//Parametro obligtaorio
+                int indexP = buscarParticion_P_E(valPath,valName);
+                if (indexP != -1) {
+                    FILE *fp;
+                    if((fp = fopen(valPath.toStdString().c_str(),"rb+"))){
+                        MBR masterboot;
+                        fseek(fp, 0, SEEK_SET);
+                        fread(&masterboot, sizeof(MBR),1,fp);
+                        masterboot.mbr_partition[indexP].part_status = '2';
+                        fseek(fp,0,SEEK_SET);
+                        fwrite(&masterboot,sizeof(MBR),1,fp);
+                        fclose(fp);
 
+                    }else{
+                        cout << "ERROR no se encuentra el disco" << endl;
+                    }
+                }else{
+
+                }
+
+            }else{
+                cout << "ERROR parametro -name no definido" << endl;
+            }
         }else{
-            cout << "ERROR parametro -name no definido" << endl;
+            cout << "ERROR parametro -path no definido" << endl;
         }
-    }else{
-        cout << "ERROR parametro -path no definido" << endl;
     }
 
 }
@@ -606,14 +624,18 @@ void recorrerREP(Nodo *raiz)
     bool flagPath = false;
     bool flagID = false;
     bool flag = false;
+    QString valName = "";
+    QString valPath = "";
+    QString valID = "";
 
     for(int i = 0; i < raiz->hijos.count(); i++)
     {
-        switch (raiz->tipo_) {
+        switch (raiz->tipo_)
+        {
         case NAME:
         {
             if(flagName){
-                //ERROR
+                cout << "ERROR parametro -name ya definido" << endl;
                 flag = true;
                 break;
             }
@@ -623,7 +645,7 @@ void recorrerREP(Nodo *raiz)
         case PATH:
         {
             if(flagPath){
-                //ERROR
+                cout << "ERROR parametro -path ya definido" << endl;
                 flag = true;
                 break;
             }
@@ -633,7 +655,7 @@ void recorrerREP(Nodo *raiz)
         case ID:
         {
             if(flagID){
-                //ERROR
+                cout << "ERROR parametro -id ya definido" << endl;
                 flag = true;
                 break;
             }
@@ -641,11 +663,22 @@ void recorrerREP(Nodo *raiz)
         }
             break;
         }
+
     }
 
     if(!flag){
-        if(flagName && flagPath && flagID){
+        if(flagPath){
+            if(flagName){
+                if(flagID){
 
+                }else{
+                    cout << "ERROR parametro -id no definido" << endl;
+                }
+            }else{
+                cout << "ERROR parametro -name no definido" << endl;
+            }
+        }else{
+            cout << "ERROR parametro -path no definido" << endl;
         }
     }
 
@@ -654,11 +687,7 @@ void recorrerREP(Nodo *raiz)
 
 void recorrerEXEC(Nodo *raiz)
 {
-    if(raiz->hijos.count() > 0){ //Ruta con comillas
 
-    }else{ //Ruta sin comillas
-
-    }
 }
 
 /*
@@ -753,9 +782,9 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
             cout << "Espacio disponible: " << (masterboot.mbr_size - espacioUsado) << "Bytes" << endl;
             cout << "..." << endl;
             //Verificar que haya espacio suficiente para crear la particion
-            cout << (masterboot.mbr_size - espacioUsado) << " - " << size_bytes << endl;
+            //cout << (masterboot.mbr_size - espacioUsado) << " - " << size_bytes << endl;
             if((masterboot.mbr_size - espacioUsado) >= size_bytes){
-                if(existeParticion(direccion,nombre) == false){
+                if(!existeParticion(direccion,nombre)){
                     if(masterboot.mbr_disk_fit == 'F'){
                         masterboot.mbr_partition[numParticion].part_type = 'P';
                         masterboot.mbr_partition[numParticion].part_fit = auxFit;
@@ -1055,34 +1084,140 @@ bool existeParticion(QString direccion, QString nombre){
     return false;
 }
 
-
+/* Metodo que se encarga de eliminar una particion de cualquier tipo
+ * @param QString direccion: ruta del archivo
+ * @param QString nombre: nombre de la particion
+ * @param valD: tipo de eliminacion fast|full
+*/
 void eliminarParticion(QString direccion, QString nombre, QString valD){
     string auxPath = direccion.toStdString();
+    string auxNombre = nombre.toStdString();
     FILE *fp;
-    MBR masterboot;
     if((fp = fopen(auxPath.c_str(), "rb+"))){
+        MBR masterboot;
+        fseek(fp,0,SEEK_SET);
+        fread(&masterboot,sizeof (MBR),1,fp);
+        int index = -1;
+        int index_Extendida = 0;
+        bool flagExtendida = false;
+        string opcion = "";
+        //Buscamos la particion primaria/extendida
+        for(int i = 0; i < 4; i++){
+            if((strcmp(masterboot.mbr_partition[i].part_name, auxNombre.c_str())) == 0 && (masterboot.mbr_partition[i].part_status != 1)){
+                index = i;
+                if(masterboot.mbr_partition[i].part_type == 'E')
+                    flagExtendida = true;
+                break;
+            }else if((masterboot.mbr_partition[i].part_type == 'E') && (masterboot.mbr_partition[i].part_status != 1)){
+                index_Extendida = i;
+            }
+        }
+        cout << "¿Seguro que desea eliminar la particion? Y/N : " ;
+        getline(cin, opcion);
+        if(opcion.compare("Y") == 0 || opcion.compare("y") == 0){
+            if(index != -1){//Si se encontro en las principales
+                if(!flagExtendida){//primaria
 
+                }else{//extendida
+
+                }
+            }else{//Si es una particion logica
+                bool flag = false;//Bandera para saber si existe
+
+                if(flag){
+
+                }else{
+                    cout << "ERROR no se encuentra la particion a eliminar" << endl;
+                }
+            }
+        }else if(opcion.compare("N") || opcion.compare("n") == 0){
+            cout << "Cancelado con exito" << endl;;
+        }else{
+            cout << "Opcion incorrecta" << endl;
+        }
+        fclose(fp);
+    }else{
+        cout << "ERROR el disco donde se va a eliminar no existe" << endl;
     }
 }
 
-/*
-bool buscarParticion_P_E(QString direccion, QString nombre){
-
-}
-
-bool buscarParticion_L(string direccion, string nombre){
-    FILE *fp;
-    if((fp = fopen(direccion.c_str(),"rb+"))){
-
-    }
-}
-
-void graficarDisco(QString direccion, QString destino){
-
-}
-
-QString getDireccion(QString id){
-
-    return "null";
-}
+/* Metodo que se encarga de agregar o quitar espacio a una particion
+ * @param QString direccion: ruta del archivo
+ * @param QString nombre: nombre de la particion
+ * @param units: unidades para agregar o quitar
 */
+void agregarQuitarParticion(QString direccion, QString nombre, int add, char unit){
+    string auxPath = direccion.toStdString();
+    string auxNombre = nombre.toStdString();
+    FILE *fp;
+    if((fp = fopen(auxPath.c_str(), "rb+"))){
+        MBR masterboot;
+
+    }else{
+        cout << "ERROR el disco donde se desea agregar/quitar unidades no existe" << endl;
+    }
+}
+
+/* Funcion que devuelve un entero para comprobar la existencia de una particion primaria o extendida en un disco
+ * @param QString direccion: ruta del archivo
+ * @param QString nombre: nombre de la particion
+ * @return -1 = no se encuentra | # de la particion asociada a ese nombre
+*/
+int buscarParticion_P_E(QString direccion, QString nombre){
+    string auxPath = direccion.toStdString();
+    string auxName = nombre.toStdString();
+    FILE *fp;
+    if((fp = fopen(auxPath.c_str(),"rb+"))){
+        MBR masterboot;
+        fseek(fp,0,SEEK_SET);
+        fread(&masterboot,sizeof(MBR),1,fp);
+        for(int i = 0; i < 4; i++){
+            if(strcmp(masterboot.mbr_partition[i].part_name,auxName.c_str())){
+                return i;
+            }
+        }
+
+    }
+    return -1;
+}
+
+/* Funcion que devuelve un entero para comprobar la existencia de una particion primaria o extendida en un disco
+ * @param QString direccion: ruta del archivo
+ * @param QString nombre: nombre de la particion
+ * @return -1 = no se encuentra |
+*/
+int buscarParticion_L(QString direccion, QString nombre){
+    string auxPath = direccion.toStdString();
+    string auxName = nombre.toStdString();
+    FILE *fp;
+    if((fp = fopen(auxPath.c_str(),"rb+"))){
+        int extendida = -1;
+        MBR masterboot;
+        fseek(fp,0,SEEK_SET);
+        fread(&masterboot,sizeof(MBR),1,fp);
+        for(int i = 0; i < 4; i++){
+            if(masterboot.mbr_partition[i].part_type == 'E'){
+                extendida = i;
+                break;
+            }
+        }
+        if(extendida != -1){
+            EBR extendedBoot;
+            fseek(fp, masterboot.mbr_partition[extendida].part_start,SEEK_SET);
+
+        }
+    }
+    return -1;
+}
+
+char getLetra(){
+
+    char letra = 0;
+    string auxDir = "";
+
+    return 'a';
+}
+
+
+
+
