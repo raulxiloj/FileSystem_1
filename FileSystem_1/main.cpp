@@ -22,6 +22,7 @@ void crearArchivo(QString);
 void crearParticionPrimaria(QString, QString, int, char, char);
 void crearParticionExtendida(QString, QString, int, char, char);
 void crearParticionLogica(QString, QString, int, char, char);
+void eliminarParticion(QString, QString, QString);
 QString getDirectorio(QString);
 QString getDireccion(QString);
 bool existeParticion(QString, QString);
@@ -367,6 +368,7 @@ void recorrerFDISK(Nodo *raiz)
     char valFit = 0;
     QString valPath = "";
     QString valName = "";
+    QString valDelete = "";
 
     for(int i = 0; i < raiz->hijos.count(); i++)
     {
@@ -474,6 +476,7 @@ void recorrerFDISK(Nodo *raiz)
                 break;
             }
             flagDelete = true;
+            valDelete = n.valor;
         }
             break;
         case NAME:
@@ -523,12 +526,12 @@ void recorrerFDISK(Nodo *raiz)
                 }else if(flagAdd){
                     if(flagSize || flagDelete){
                         cout << "ERROR: Parametros -size|-delete demas" << endl;
-                    }
+                    }   
                 }else if(flagDelete){
                     if(flagSize || flagAdd || flagFit || flagType){
                         cout << "ERROR: Parametros demas" << endl;
                     }else{
-
+                        eliminarParticion(valPath,valName,valDelete);
                     }
                 }
             }else {
@@ -1052,6 +1055,15 @@ bool existeParticion(QString direccion, QString nombre){
     return false;
 }
 
+
+void eliminarParticion(QString direccion, QString nombre, QString valD){
+    string auxPath = direccion.toStdString();
+    FILE *fp;
+    MBR masterboot;
+    if((fp = fopen(auxPath.c_str(), "rb+"))){
+
+    }
+}
 
 /*
 bool buscarParticion_P_E(QString direccion, QString nombre){
