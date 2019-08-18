@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <iostream>
 #include <sys/stat.h>
+#include <fstream>
 
 #include "scanner.h"
 #include "parser.h"
@@ -11,7 +12,6 @@ extern int yyparse();
 extern Nodo *raiz; // Raiz del arbol
 
 void imprimirEncabezado();
-[[ noreturn ]] void escribaUnComando() ;
 void reconocerComando(Nodo*);
 void recorrerMKDISK(Nodo*);
 void recorrerRMDISK(Nodo*);
@@ -19,6 +19,7 @@ void recorrerFDISK(Nodo*);
 void recorrerMOUNT(Nodo*);
 void recorrerUNMOUNT(Nodo*);
 void recorrerREP(Nodo*);
+void recorrerEXEC(Nodo*);
 void crearArchivo(QString);
 void crearParticionPrimaria(QString, QString, int, char, char);
 void crearParticionExtendida(QString, QString, int, char, char);
@@ -30,6 +31,7 @@ QString getDireccion(QString);
 bool existeParticion(QString, QString);
 int buscarParticion_P_E(QString, QString);
 int buscarParticion_L(QString, QString);
+void leerComando(std::string);
 
 using namespace std;
 
@@ -91,13 +93,22 @@ typedef struct{
 
 ListaMount *lista = new ListaMount();
 
+bool flag_global = true;
+
 /*
     FUNCION PRINCIPAL
 */
 int main()
 {
     imprimirEncabezado();
-    escribaUnComando();
+    while(flag_global){
+        char input[400];
+        printf(">> ");
+        fgets(input,sizeof (input),stdin);
+        string aux = input;
+        leerComando(aux);
+        memset(input,0,400);
+    }
 }
 
 void imprimirEncabezado()
@@ -107,26 +118,7 @@ void imprimirEncabezado()
     cout << "-----------------------------------------------------------------------------" << endl;
     cout << "                                                       Raul Xiloj - 201612113" << endl;
     cout << endl;
-}
-
-void escribaUnComando()
-{
     cout << "Por favor escriba algunos comandos:" << endl;
-    while(true){
-        char input[400];
-        printf(">> ");
-        fgets(input,sizeof (input),stdin);
-        YY_BUFFER_STATE buffer = yy_scan_string(input);
-        if(yyparse() == 0){
-            Graficador *g = new Graficador(raiz);
-            g->generarImagen();
-            //cout << "Cadena correcta" << endl;
-            reconocerComando(raiz);
-            memset(input,0,400);
-        }else{
-            cout << "Comando no reconocido" << endl;
-        }
-    }
 }
 
 /*
@@ -167,8 +159,14 @@ void reconocerComando(Nodo *raiz)
     }
         break;
     case REP:
+    {
+
+    }
         break;
     case EXEC:
+    {
+        recorrerEXEC(raiz);
+    }
         break;
     default: printf("Error no se reconoce el comando");
 
@@ -700,6 +698,19 @@ void recorrerREP(Nodo *raiz)
 
 void recorrerEXEC(Nodo *raiz)
 {
+    QString valPath = raiz->hijos.at(0).valor;
+    string auxPath = valPath.toStdString();
+    string line;
+    ifstream myfile(auxPath);
+    if(myfile.is_open()){
+        while(getline(myfile,line)){
+            cout << line << endl;
+            leerComando(line);
+        }
+        myfile.close();
+    }else{
+        cout << "ERROR no se encuentra el archivo" << endl;
+    }
 
 }
 
@@ -1223,7 +1234,17 @@ int buscarParticion_L(QString direccion, QString nombre){
     return -1;
 }
 
-
+/**/
+void leerComando(string comando){
+    YY_BUFFER_STATE buffer = yy_scan_string(comando.c_str());
+    if(yyparse() == 0){
+        Graficador *g = new Graficador(raiz);
+        g->generarImagen();
+        reconocerComando(raiz);
+    }else{
+        cout << "Comando no reconocido" << endl;
+    }
+}
 
 
 
