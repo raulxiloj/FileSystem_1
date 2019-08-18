@@ -593,7 +593,13 @@ void recorrerMOUNT(Nodo *raiz){
                         fseek(fp,0,SEEK_SET);
                         fwrite(&masterboot,sizeof(MBR),1,fp);
                         fclose(fp);
+                        int letra = lista->buscarLetra(valPath,valName);
+                        if(letra != -1){
+                            cout << "ERROR la particion ya esta montada" << endl;
+                        }else{
+                            int num = lista->buscarNumero(valPath, valName);
 
+                        }
                     }else{
                         cout << "ERROR no se encuentra el disco" << endl;
                     }
@@ -1210,13 +1216,6 @@ int buscarParticion_L(QString direccion, QString nombre){
     return -1;
 }
 
-char getLetra(){
-
-    char letra = 0;
-    string auxDir = "";
-
-    return 'a';
-}
 
 
 

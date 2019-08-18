@@ -37,3 +37,20 @@ int ListaMount::buscarLetra(QString direccion, QString nombre){
     }
     return retorno;
 }
+
+/* Funcion para verificar que numero asignarle al id de un nodo
+ * @param QString direccion: Ruta del disco
+ * @param QString nombre: nombre de la particion
+ * @return retorno = numero a asignar
+*/
+int ListaMount::buscarNumero(QString direccion, QString nombre){
+    int retorno = 1;
+    NodoMount *aux = primero;
+    while(aux!=nullptr){
+        if((direccion == aux->direccion) && (retorno == aux->num)){
+            retorno++;
+        }
+        aux = aux->siguiente;
+    }
+    return retorno;
+}

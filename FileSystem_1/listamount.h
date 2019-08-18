@@ -9,6 +9,7 @@ public:
     NodoMount *primero;
     ListaMount();
     int buscarLetra(QString direccion, QString nombre);
+    int buscarNumero(QString direccion, QString nombre);
     void insertarNodo(NodoMount*);
 };
 
