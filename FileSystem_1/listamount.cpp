@@ -82,3 +82,20 @@ int ListaMount::buscarNumero(QString direccion, QString nombre){
     }
     return retorno;
 }
+
+/* Funcion que duelve la ruta de una particion
+ * @param id = identificador de la particion
+ * @return ruta = si lo encontro | "null" si no la encontro
+*/
+QString ListaMount::getDireccion(QString id){
+    NodoMount *aux = primero;
+    while(aux!=nullptr){
+        QString tempID = "vd";
+        tempID += aux->letra + QString::number(aux->num);
+        if(id == tempID){
+            return aux->direccion;
+        }
+        aux = aux->siguiente;
+    }
+    return "null";
+}

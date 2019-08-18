@@ -32,6 +32,8 @@ bool existeParticion(QString, QString);
 int buscarParticion_P_E(QString, QString);
 int buscarParticion_L(QString, QString);
 void leerComando(std::string);
+void graficarMBR();
+void graficarDisco();
 
 using namespace std;
 
@@ -641,7 +643,8 @@ void recorrerREP(Nodo *raiz)
 
     for(int i = 0; i < raiz->hijos.count(); i++)
     {
-        switch (raiz->tipo_)
+        Nodo n = raiz->hijos.at(i);
+        switch (n.tipo_)
         {
         case NAME:
         {
@@ -651,6 +654,7 @@ void recorrerREP(Nodo *raiz)
                 break;
             }
             flagName = true;
+            valName = n.valor;
         }
             break;
         case PATH:
@@ -661,6 +665,7 @@ void recorrerREP(Nodo *raiz)
                 break;
             }
             flagPath = true;
+            valPath = n.valor;
         }
             break;
         case ID:
@@ -671,6 +676,7 @@ void recorrerREP(Nodo *raiz)
                 break;
             }
             flagID = true;
+            valID = n.valor;
         }
             break;
         }
@@ -681,7 +687,21 @@ void recorrerREP(Nodo *raiz)
         if(flagPath){
             if(flagName){
                 if(flagID){
-
+                    QString direccion = lista->getDireccion(valID);
+                    if(direccion != "null"){
+                        QString directorio = getDirectorio(valPath);
+                        string comando = "sudo mkdir -p \'"+directorio.toStdString()+"\'";
+                        system(comando.c_str());
+                        string comando2 = "sudo chmod -R 777 \'"+directorio.toStdString()+"\'";
+                        system(comando2.c_str());
+                        if(valName == "mbr"){
+                            graficarMBR();
+                        }else{
+                            graficarDisco();
+                        }
+                    }else{
+                        cout << "ERROR no se encuentra la particion" << endl;
+                    }
                 }else{
                     cout << "ERROR parametro -id no definido" << endl;
                 }
@@ -711,7 +731,6 @@ void recorrerEXEC(Nodo *raiz)
     }else{
         cout << "ERROR no se encuentra el archivo" << endl;
     }
-
 }
 
 /*
@@ -1234,7 +1253,9 @@ int buscarParticion_L(QString direccion, QString nombre){
     return -1;
 }
 
-/**/
+/* Metodo para leer una linea tanto ingresada por el usuario como por un archi
+ * @param string comando: linea a leer
+*/
 void leerComando(string comando){
     YY_BUFFER_STATE buffer = yy_scan_string(comando.c_str());
     if(yyparse() == 0){
@@ -1246,5 +1267,6 @@ void leerComando(string comando){
     }
 }
 
+void graficarDisco(){
 
-
+}

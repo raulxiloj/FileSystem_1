@@ -8,3 +8,5 @@ NodoMount::NodoMount(QString direccion, QString nombre, char letra, int num)
     this->num = num;
     this->siguiente = nullptr;
 }
+
+
