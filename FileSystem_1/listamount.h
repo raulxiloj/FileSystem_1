@@ -11,6 +11,7 @@ public:
     int buscarLetra(QString direccion, QString nombre);
     int buscarNumero(QString direccion, QString nombre);
     void insertarNodo(NodoMount*);
+    int eliminarNodo(QString);
 };
 
 #endif // LISTAMOUNT_H

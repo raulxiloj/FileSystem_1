@@ -15,6 +15,34 @@ void ListaMount::insertarNodo(NodoMount *nuevo){
     aux->siguiente = nuevo;
 }
 
+/* Funcion para eliminar un nodo de la lista
+ * @param QString ID: identificador
+ * @return 1 = se elimino exitosamente | 0 = No se encontro el nodo
+*/
+int ListaMount::eliminarNodo(QString ID){
+    NodoMount *aux = primero;
+    QString tempID = "vd";
+    tempID += aux->letra + QString::number(aux->num);
+    if(ID == tempID){
+        primero = aux->siguiente;
+        free(aux);
+        return 1;
+    }else{
+        NodoMount *aux2 = nullptr;
+        while(aux!=nullptr){
+            tempID = "vd";
+            tempID += aux->letra + QString::number(aux->num);
+            if(ID == tempID){
+                aux2->siguiente = aux->siguiente;
+                return 1;
+            }
+            aux2 = aux;
+            aux = aux->siguiente;
+        }
+    }
+    return 0;
+}
+
 /* Funcion para verificar que letra asignarle al id de un nodo
  * @param QString direccion: Ruta del disco
  * @param QString nombre: nombre de la particion

@@ -583,7 +583,7 @@ void recorrerMOUNT(Nodo *raiz){
         if(flagPath){//Parametro obligatorio
             if(flagName){//Parametro obligtaorio
                 int indexP = buscarParticion_P_E(valPath,valName);
-                if (indexP != -1) {
+                if(indexP != -1){
                     FILE *fp;
                     if((fp = fopen(valPath.toStdString().c_str(),"rb+"))){
                         MBR masterboot;
@@ -598,7 +598,12 @@ void recorrerMOUNT(Nodo *raiz){
                             cout << "ERROR la particion ya esta montada" << endl;
                         }else{
                             int num = lista->buscarNumero(valPath, valName);
-
+                            char auxLetra = static_cast<char>(letra);
+                            string id = "vd";
+                            id += auxLetra + to_string(num);
+                            NodoMount *n = new NodoMount(valPath,valName,auxLetra,num);
+                            lista->insertarNodo(n);
+                            cout << "Particion " + valName.toStdString() + "montada con exito" << endl;
                         }
                     }else{
                         cout << "ERROR no se encuentra el disco" << endl;
@@ -619,9 +624,11 @@ void recorrerMOUNT(Nodo *raiz){
 
 void recorrerUNMOUNT(Nodo *raiz){
     QString valID = raiz->hijos.at(0).valor;
-
-
-
+    int eliminado = lista->eliminarNodo(valID);
+    if(eliminado == 1)
+        cout << "Unidad desmontada con exito" << endl;
+    else
+        cout << "ERROR no se encuentra esa unidad montada" << endl;
 }
 
 void recorrerREP(Nodo *raiz)
