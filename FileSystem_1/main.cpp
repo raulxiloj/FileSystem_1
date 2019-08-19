@@ -742,9 +742,9 @@ void recorrerEXEC(Nodo *raiz)
 */
 void crearArchivo(QString direccion){
     QString aux = getDirectorio(direccion);
-    string comando = "sudo mkdir -p "+aux.toStdString();
+    string comando = "sudo mkdir -p \'"+aux.toStdString()+"\'";
     system(comando.c_str());
-    string comando2 = "sudo chmod -R 777 "+aux.toStdString();
+    string comando2 = "sudo chmod -R 777 \'"+aux.toStdString()+"\'";
     system(comando2.c_str());
     string arch = direccion.toStdString();
     FILE *fp = fopen(arch.c_str(),"wb");
