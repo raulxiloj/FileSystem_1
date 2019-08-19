@@ -606,10 +606,11 @@ char *yytext;
     #include <iostream>
     #include "parser.h"
     Nodo *raiz;
-#line 610 "scanner.cpp"
+    char coment[400];
+#line 611 "scanner.cpp"
 /*Regular expresions*/
 
-#line 613 "scanner.cpp"
+#line 614 "scanner.cpp"
 
 #define INITIAL 0
 #define COM 1
@@ -827,9 +828,9 @@ YY_DECL
 		}
 
 	{
-#line 22 "Lexico.l"
+#line 23 "Lexico.l"
 
-#line 833 "scanner.cpp"
+#line 834 "scanner.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -888,194 +889,198 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 23 "Lexico.l"
+#line 24 "Lexico.l"
 
 	YY_BREAK
 
 case 2:
 YY_RULE_SETUP
-#line 25 "Lexico.l"
+#line 26 "Lexico.l"
 { BEGIN COM; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 27 "Lexico.l"
+#line 28 "Lexico.l"
 { return mkdisk; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 28 "Lexico.l"
+#line 29 "Lexico.l"
 { return rmdisk; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 29 "Lexico.l"
+#line 30 "Lexico.l"
 { return fdisk; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 30 "Lexico.l"
+#line 31 "Lexico.l"
 { return mount; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 31 "Lexico.l"
+#line 32 "Lexico.l"
 { return unmount; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 32 "Lexico.l"
+#line 33 "Lexico.l"
 { return rep; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 33 "Lexico.l"
+#line 34 "Lexico.l"
 { return exec; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 34 "Lexico.l"
+#line 35 "Lexico.l"
 { return size; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 35 "Lexico.l"
+#line 36 "Lexico.l"
 { return unit; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 36 "Lexico.l"
+#line 37 "Lexico.l"
 { return path; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 37 "Lexico.l"
+#line 38 "Lexico.l"
 { return fit; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 38 "Lexico.l"
+#line 39 "Lexico.l"
 { return name; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 39 "Lexico.l"
+#line 40 "Lexico.l"
 { return type; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 40 "Lexico.l"
+#line 41 "Lexico.l"
 { return del; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 41 "Lexico.l"
+#line 42 "Lexico.l"
 { return add; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 42 "Lexico.l"
+#line 43 "Lexico.l"
 { return id; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 43 "Lexico.l"
+#line 44 "Lexico.l"
 { return bf; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 44 "Lexico.l"
+#line 45 "Lexico.l"
 { return ff; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 45 "Lexico.l"
+#line 46 "Lexico.l"
 { return wf; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 46 "Lexico.l"
+#line 47 "Lexico.l"
 { return fast; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 47 "Lexico.l"
+#line 48 "Lexico.l"
 { return full; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 48 "Lexico.l"
+#line 49 "Lexico.l"
 { return mbr; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 49 "Lexico.l"
+#line 50 "Lexico.l"
 { return disk; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 52 "Lexico.l"
+#line 53 "Lexico.l"
 { return igual; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 54 "Lexico.l"
+#line 55 "Lexico.l"
 {strcpy(yylval.text, yytext); return num;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 55 "Lexico.l"
+#line 56 "Lexico.l"
 {strcpy(yylval.text, yytext); return caracter;}
 	YY_BREAK
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 56 "Lexico.l"
+#line 57 "Lexico.l"
 {strcpy(yylval.text, yytext); return cadena;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 57 "Lexico.l"
+#line 58 "Lexico.l"
 {strcpy(yylval.text, yytext); return identificador;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 58 "Lexico.l"
+#line 59 "Lexico.l"
 {strcpy(yylval.text, yytext); return ruta;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 59 "Lexico.l"
+#line 60 "Lexico.l"
 {strcpy(yylval.text, yytext); return extension;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 61 "Lexico.l"
+#line 62 "Lexico.l"
 {}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 63 "Lexico.l"
+#line 64 "Lexico.l"
 {std::cout <<yytext <<" Error Lexico" << std::endl;}
 	YY_BREAK
 
 case 35:
 /* rule 35 can match eol */
 YY_RULE_SETUP
-#line 66 "Lexico.l"
-{ BEGIN INITIAL; };
+#line 67 "Lexico.l"
+{ BEGIN INITIAL;
+                   strcpy(yylval.text, coment);
+                   memset(coment,0,400);
+                   return comentario;
+                 };
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 67 "Lexico.l"
-{ };
+#line 72 "Lexico.l"
+{ strcat(coment, yytext); };
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 69 "Lexico.l"
+#line 74 "Lexico.l"
 ECHO;
 	YY_BREAK
-#line 1079 "scanner.cpp"
+#line 1084 "scanner.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COM):
 	yyterminate();
@@ -2081,6 +2086,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 69 "Lexico.l"
+#line 74 "Lexico.l"
 
 

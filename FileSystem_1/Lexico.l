@@ -2,6 +2,7 @@
     #include <iostream>
     #include "parser.h"
     Nodo *raiz;
+    char coment[400];
 %}
 
 %option case-insensitive
@@ -60,10 +61,14 @@ INITIAL
 
     [[:blank:]] {}
 
-    .           {std::cout <<yytext <<" Error Lexico" << std::endl;}
+    .            {std::cout <<yytext <<" Error Lexico" << std::endl;}
 }
 
-<COM>"\n"  { BEGIN INITIAL; };
-<COM>.     { };
+<COM>"\n"        { BEGIN INITIAL;
+                   strcpy(yylval.text, coment);
+                   memset(coment,0,400);
+                   return comentario;
+                 };
+<COM>.           { strcat(coment, yytext); };
 
 %%

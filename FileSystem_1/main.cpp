@@ -61,6 +61,7 @@ enum Choice
     NAME = 15,
     ADD = 16,
     ID = 17,
+    COMENTARIO = 18,
 };
 
 /*
@@ -163,12 +164,18 @@ void reconocerComando(Nodo *raiz)
         break;
     case REP:
     {
-
+        Nodo n = raiz->hijos.at(0);
+        recorrerMOUNT(&n);
     }
         break;
     case EXEC:
     {
         recorrerEXEC(raiz);
+    }
+        break;
+    case COMENTARIO:
+    {
+
     }
         break;
     default: printf("Error no se reconoce el comando");
@@ -1264,6 +1271,7 @@ void leerComando(string comando){
         Graficador *g = new Graficador(raiz);
         g->generarImagen();
         reconocerComando(raiz);
+
     }else{
         cout << "Comando no reconocido" << endl;
     }

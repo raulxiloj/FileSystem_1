@@ -13,7 +13,7 @@ Graficador::Graficador(Nodo *r)
 QString Graficador::generarCodigoGraphviz(){
     dot = "digraph G{\n";
     dot += "node [shape=\"box\"]\n";
-    dot += "NodoAST0[label=\"" + limpiarString(""+raiz->tipo+""+raiz->valor)+ "\"];\n";
+    dot += "NodoAST0[label=\"" + limpiarString(""+raiz->tipo+" "+raiz->valor)+ "\"];\n";
     cont = 1;
     recorrerAST("NodoAST0",raiz);
     dot += "}";

@@ -74,7 +74,8 @@ extern int yydebug;
     caracter = 284,
     cadena = 285,
     identificador = 286,
-    ruta = 287
+    ruta = 287,
+    comentario = 288
   };
 #endif
 
@@ -85,11 +86,11 @@ union YYSTYPE
 {
 #line 21 "Sintactico.y" /* yacc.c:1909  */
 
-        char text[256];
+        char text[400];
         class Nodo *nodito;
     
 
-#line 93 "parser.h" /* yacc.c:1909  */
+#line 94 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
