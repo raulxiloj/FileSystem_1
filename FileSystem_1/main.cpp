@@ -33,7 +33,8 @@ int buscarParticion_P_E(QString, QString);
 int buscarParticion_L(QString, QString);
 void leerComando(std::string);
 void graficarMBR();
-void graficarDisco();
+void graficarDisco(QString, QString, QString);
+QString getExtension(QString);
 
 using namespace std;
 
@@ -688,6 +689,7 @@ void recorrerREP(Nodo *raiz)
             if(flagName){
                 if(flagID){
                     QString direccion = lista->getDireccion(valID);
+                    QString ext = getExtension(valPath);
                     if(direccion != "null"){
                         QString directorio = getDirectorio(valPath);
                         string comando = "sudo mkdir -p \'"+directorio.toStdString()+"\'";
@@ -695,9 +697,9 @@ void recorrerREP(Nodo *raiz)
                         string comando2 = "sudo chmod -R 777 \'"+directorio.toStdString()+"\'";
                         system(comando2.c_str());
                         if(valName == "mbr"){
-                            graficarMBR();
+                            //graficarMBR();
                         }else{
-                            graficarDisco();
+                            graficarDisco(direccion,valPath,ext);
                         }
                     }else{
                         cout << "ERROR no se encuentra la particion" << endl;
@@ -1267,6 +1269,71 @@ void leerComando(string comando){
     }
 }
 
-void graficarDisco(){
+/* Metodo para graficar un disco con su estructura de las particiones */
+void graficarDisco(QString direccion, QString destino, QString extension){
+    string auxDir = direccion.toStdString();
+    FILE *fp;
+    FILE *graphDot;
+    if((fp = fopen(auxDir.c_str(),"r"))){
+        graphDot = fopen("grafica.dot","w");
+        fprintf(graphDot,"digraph G{\n");
+        fprintf(graphDot, "table [shape = box, label=<\n");
+        fprintf(graphDot,"<table border=\'0\' cellborder=\'2\' width=\'600\' height=\"200\" color=\'LIGHTSTEELBLUE\'>\n");
+        fprintf(graphDot, "<tr>");
+        fprintf(graphDot, "<td height=\'200\' width=\'100\'> MBR </td>");
+        MBR masterboot;
+        fseek(graphDot,0,SEEK_SET);
+        fread(&masterboot,sizeof(MBR),1,fp);
+        int total = masterboot.mbr_size;
+        int parcial = 0;
+        double espacioUsado = 0;
+        for(int i = 0; i < 4; i++){
+            parcial = masterboot.mbr_partition[i].part_size;
+            double porcentaje = (parcial*100)/total;
+            double porcentaje2 = (porcentaje*500)/100;
+            espacioUsado += porcentaje2;
+            //Buscamos las particiones que no esten vacias
+            if((masterboot.mbr_partition[i].part_start != -1) && (masterboot.mbr_partition[i].part_status != 0)){
+                if(masterboot.mbr_partition[i].part_status != 1){
+                    if(masterboot.mbr_partition[i].part_type == 'P'){
+                        fprintf(graphDot, "<TD HEIGHT=\"200\" WIDTH=\"%f\">PRIMARIA <br/> Ocupado: %f%c</TD>\n",porcentaje2,porcentaje,'%');
+                    }else{//Extendida
+                        fprintf(graphDot,"<td height=\'200\' width=\'%f\'> \n",porcentaje2);
+                        fprintf(graphDot,"<table border=\'0\' height=\'200\' width=\'%f\' cellborder=\'1\' >\n", porcentaje2);
+                        fprintf(graphDot, "<tr>\n");
+                        fprintf(graphDot,"<td height=\'50' width=\'%f\'>Extendida<\td>\n",porcentaje2);
+                        fprintf(graphDot, "</tr>\n ");
+                        fprintf(graphDot, "<tr>\n");
+                        fseek(fp,masterboot.mbr_partition[i].part_start,SEEK_SET);
+                        //EBR extendedBoot;
+                    }
 
+                }else{//Eliminada fast
+
+                }
+            }
+        }
+        fprintf(graphDot,"<td height='200' width=\'%f\'> ESPACIO LIBRE </td>",(100-espacioUsado));
+        fprintf(graphDot, "</tr> \n </table> \n>];\n}");
+        fclose(graphDot);
+        fclose(fp);
+        string comando = "dot -T"+extension.toStdString()+"grafica.dot -o "+destino.toStdString();
+        system(comando.c_str());
+    }else{
+        cout << "ERROR al crear reporte, disco no encontrado" << endl;
+    }
+}
+
+/* Funcion que retorna la extension de un archivo
+ * @param QString direccion: ruta del archivo
+ * @return .pdf, jpg, png | "error"
+*/
+QString getExtension(QString direccion){
+    string aux = direccion.toStdString();
+    string delimiter = ".";
+    size_t pos = 0;
+    while((pos = aux.find(delimiter))!=string::npos){
+        aux.erase(0,pos+delimiter.length());
+    }
+    return QString::fromStdString(aux);
 }
