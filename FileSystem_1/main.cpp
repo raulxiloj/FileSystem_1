@@ -318,11 +318,11 @@ void recorrerMKDISK(Nodo *raiz)
                 fwrite(&masterboot,sizeof(MBR),1,fp);
                 fclose(fp);
             }else{
-                cout << "Parametro -size no definido " << endl;
+                cout << "ERROR Parametro -size no definido " << endl;
             }
 
         }else{
-            cout << "ERROR: Se esperaban mas parametros" << endl;
+            cout << "ERROR Parametro -path  no definido" << endl;
         }
     }
 
@@ -428,6 +428,7 @@ void recorrerFDISK(Nodo *raiz)
             }
             flagPath = true;
             valPath = n.valor;
+            valPath = valPath.replace("\"","");
         }
             break;
         case TYPE:
@@ -831,10 +832,9 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
             for(int i = 0; i < 4; i++){
                 espacioUsado += masterboot.mbr_partition[i].part_size;
             }
-            cout << "Espacio disponible: " << (masterboot.mbr_size - espacioUsado) << "Bytes" << endl;
-            cout << "..." << endl;
+            cout << "Espacio disponible: " << (masterboot.mbr_size - espacioUsado) << " Bytes" << endl;
+            cout << "Espacio necesario:  " << size_bytes << " Bytes" << endl;
             //Verificar que haya espacio suficiente para crear la particion
-            //cout << (masterboot.mbr_size - espacioUsado) << " - " << size_bytes << endl;
             if((masterboot.mbr_size - espacioUsado) >= size_bytes){
                 if(!existeParticion(direccion,nombre)){
                     if(masterboot.mbr_disk_fit == 'F'){
@@ -843,8 +843,8 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
                         //start
                         if(numParticion == 0){
                             masterboot.mbr_partition[numParticion].part_start = sizeof(masterboot);
-                        }else{//CHECK THIS ONE
-                            masterboot.mbr_partition[numParticion].part_start = masterboot.mbr_partition[numParticion-1].part_size + masterboot.mbr_partition[numParticion].part_start;
+                        }else{
+                            masterboot.mbr_partition[numParticion].part_start = masterboot.mbr_partition[numParticion-1].part_size + masterboot.mbr_partition[numParticion-1].part_start;
                         }
                         masterboot.mbr_partition[numParticion].part_size = size_bytes;
                         masterboot.mbr_partition[numParticion].part_status = 0;
@@ -857,7 +857,8 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
                         for(int i = 0; i < size_bytes; i++){
                             fwrite(&buffer,1,1,fp);
                         }
-                        cout << "Particion creada con exito" << endl;
+                        cout << "..." << endl;
+                        cout << "Particion primaria creada con exito" << endl;
                     }else if(masterboot.mbr_disk_fit == 'B'){
 
                     }else if(masterboot.mbr_disk_fit == 'W'){
@@ -868,7 +869,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
                 }
 
             }else{
-                cout << "ERROR la particion a crear excede el tamano libre" << endl;
+                cout << "ERROR la particion a crear excede el espacio libre" << endl;
             }
         }else{
             cout << "ERROR: Ya existen 4 particiones, no se puede crear otra" << endl;
@@ -914,7 +915,6 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
 
     FILE *fp;
     MBR masterboot;
-
     if((fp = fopen(auxPath.c_str(), "rb+"))){
         bool flagParticion = false;//Flag para ver si hay una particion disponible
         bool flagExtendida = false;//Flag para ver si ya hay una particion extendida
@@ -942,10 +942,10 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
                 for(int i = 0; i < 4; i++){
                     espacioUsado += masterboot.mbr_partition[i].part_size;
                 }
-                cout << "Espacio disponible: " << (masterboot.mbr_size - espacioUsado) << endl;
-                cout << "..." << endl;
+                cout << "Espacio disponible: " << (masterboot.mbr_size - espacioUsado) <<" Bytes"<< endl;
+                cout << "Espacio necesario:  " << size_bytes << " Bytes" << endl;
                 //Verificar que haya espacio suficiente para crear la particion
-                if((masterboot.mbr_size - espacioUsado) > size_bytes){
+                if((masterboot.mbr_size - espacioUsado) >= size_bytes){
                     if(!(existeParticion(direccion,nombre))){
                         if(masterboot.mbr_disk_fit == 'F'){
                             masterboot.mbr_partition[numParticion].part_type = 'E';
@@ -953,16 +953,16 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
                             //start
                             if(numParticion == 0){
                                 masterboot.mbr_partition[numParticion].part_start = sizeof(masterboot);
-                            }else{//CHECK THIS ONE
-                                masterboot.mbr_partition[numParticion].part_start = masterboot.mbr_partition[numParticion-1].part_size + masterboot.mbr_partition[numParticion].part_start;
+                            }else{
+                                masterboot.mbr_partition[numParticion].part_start = masterboot.mbr_partition[numParticion-1].part_size + masterboot.mbr_partition[numParticion-1].part_start;
                             }
                             masterboot.mbr_partition[numParticion].part_size = size_bytes;
-                            masterboot.mbr_partition[numParticion].part_status = 1;
+                            masterboot.mbr_partition[numParticion].part_status = 0;
                             strcpy(masterboot.mbr_partition[numParticion].part_name,nombre.toStdString().c_str());
                             //Se guarda de nuevo el MBR
                             fseek(fp,0,SEEK_SET);
                             fwrite(&masterboot,sizeof(MBR),1,fp);
-                            //Se guarda la particion
+                            //Se guarda la particion extendida
                             fseek(fp, masterboot.mbr_partition[numParticion].part_start,SEEK_SET);
                             EBR extendedBoot;
                             extendedBoot.part_fit = auxFit;
@@ -975,7 +975,8 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
                             for(int i = 0; i < (size_bytes - (int)sizeof(EBR)); i++){
                                 fwrite(&buffer,1,1,fp);
                             }
-                            cout << "Particion creada con exito" << endl;
+                            cout << "..." << endl;
+                            cout << "Particion extendida creada con exito" << endl;
                         }else if(masterboot.mbr_disk_fit == 'B'){
 
                         }else if(masterboot.mbr_disk_fit == 'W'){
@@ -1062,9 +1063,10 @@ void crearParticionLogica(QString direccion, QString nombre, int size, char fit,
                     strcpy(extendedBoot.part_name, nombre.toStdString().c_str());
                     fseek(fp, masterboot.mbr_partition[numExtendida].part_start ,SEEK_SET);
                     fwrite(&extendedBoot,sizeof(EBR),1,fp);
+                    cout << "Particion logica creada con exito "<< endl;
                 }
             }else{
-                while(extendedBoot.part_next != -1 && (ftell(fp) < (masterboot.mbr_partition[numExtendida].part_size + masterboot.mbr_partition[numExtendida].part_start))){
+                while((extendedBoot.part_next != -1) && (ftell(fp) < (masterboot.mbr_partition[numExtendida].part_size + masterboot.mbr_partition[numExtendida].part_start))){
                     fseek(fp,extendedBoot.part_next,SEEK_SET);
                     fread(&extendedBoot,sizeof(EBR),1,fp);
                 }
@@ -1084,11 +1086,11 @@ void crearParticionLogica(QString direccion, QString nombre, int size, char fit,
                     extendedBoot.part_next = -1;
                     strcpy(extendedBoot.part_name,nombre.toStdString().c_str());
                     fwrite(&extendedBoot,sizeof(EBR),1,fp);
+                    cout << "Particion logica creada con exito "<< endl;
                 }
             }
         }else{
-            cout << "ERROR se necesita una particion extendida donde " << endl;
-            cout << "guardar la logica" << endl;
+            cout << "ERROR se necesita una particion extendida donde guardar la logica " << endl;
         }
     fclose(fp);
     }else{
