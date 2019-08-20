@@ -99,3 +99,19 @@ QString ListaMount::getDireccion(QString id){
     }
     return "null";
 }
+
+/* Funcion que retorna un booleano para verificar si existe un nodo
+ * @param QString direccion: direccion del disco
+ * @param QString nombre: nombre de la particion
+ * @return true = si lo encuentra | false = si no lo encuentra
+*/
+bool ListaMount::buscarNodo(QString direccion, QString nombre){
+    NodoMount *aux = primero;
+    while(aux!=nullptr){
+        if((aux->direccion == direccion) && (aux->nombre == nombre)){
+            return true;
+        }
+        aux = aux->siguiente;
+    }
+    return false;
+}

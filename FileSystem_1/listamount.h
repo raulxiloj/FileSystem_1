@@ -12,6 +12,7 @@ public:
     int buscarNumero(QString direccion, QString nombre);
     void insertarNodo(NodoMount*);
     int eliminarNodo(QString);
+    bool buscarNodo(QString, QString);
     QString getDireccion(QString);
 };
 
