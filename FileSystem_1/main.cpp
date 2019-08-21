@@ -32,7 +32,7 @@ bool existeParticion(QString, QString);
 int buscarParticion_P_E(QString, QString);
 int buscarParticion_L(QString, QString);
 void leerComando(std::string);
-void graficarMBR();
+void graficarMBR(QString, QString, QString);
 void graficarDisco(QString, QString, QString);
 QString getExtension(QString);
 
@@ -165,7 +165,7 @@ void reconocerComando(Nodo *raiz)
     case REP:
     {
         Nodo n = raiz->hijos.at(0);
-        recorrerMOUNT(&n);
+        recorrerREP(&n);
     }
         break;
     case EXEC:
@@ -607,7 +607,7 @@ void recorrerMOUNT(Nodo *raiz){
                         fwrite(&masterboot,sizeof(MBR),1,fp);
                         fclose(fp);
                         int letra = lista->buscarLetra(valPath,valName);
-                        if(letra != -1){
+                        if(letra == -1){
                             cout << "ERROR la particion ya esta montada" << endl;
                         }else{
                             int num = lista->buscarNumero(valPath, valName);
@@ -616,7 +616,7 @@ void recorrerMOUNT(Nodo *raiz){
                             id += auxLetra + to_string(num);
                             NodoMount *n = new NodoMount(valPath,valName,auxLetra,num);
                             lista->insertarNodo(n);
-                            cout << "Particion " + valName.toStdString() + "montada con exito" << endl;
+                            cout << "Particion " + valName.toStdString() + " montada con exito" << endl;
                         }
                     }else{
                         cout << "ERROR no se encuentra el disco" << endl;
@@ -709,7 +709,7 @@ void recorrerREP(Nodo *raiz)
                         string comando2 = "sudo chmod -R 777 \'"+directorio.toStdString()+"\'";
                         system(comando2.c_str());
                         if(valName == "mbr"){
-                            //graficarMBR();
+                            graficarMBR(direccion,valPath,ext);
                         }else{
                             graficarDisco(direccion,valPath,ext);
                         }
@@ -1495,6 +1495,62 @@ void graficarDisco(QString direccion, QString destino, QString extension){
         system(comando.c_str());
     }else{
         cout << "ERROR al crear reporte, disco no encontrado" << endl;
+    }
+}
+
+/* Metodo para generar un reporte del MBR de un disco */
+void graficarMBR(QString direccion, QString destino, QString extension){
+    string auxDir = direccion.toStdString();
+    FILE *fp;
+    FILE *graphDot;
+    if((fp = fopen(auxDir.c_str(),"r"))){
+        graphDot = fopen("grafica.dot", "w");
+        fprintf(graphDot,"digraph G{ \n");
+        fprintf(graphDot,"subgraph cluster{\n label=\"MBR\"");
+        fprintf(graphDot,"\nNodo[shape=box,label=<\n");
+        fprintf(graphDot,"<table border=\'0\' cellborder=\'1\' width=\'300\'  height=\'200\' >\n");
+        fprintf(graphDot, "<tr>  <td width=\'150\'> <b>Nombre</b> </td> <td width=\'150\'> <b>Valor</b> </td>  </tr>\n");
+        MBR masterBoot;
+        fseek(fp,0,SEEK_SET);
+        fread(&masterBoot,sizeof(MBR),1,fp);
+        int tamano = masterBoot.mbr_size;
+        fprintf(graphDot,"<tr>  <td><b>mbr_tamaño</b></td><td>%d</td>  </tr>\n",tamano);
+        struct tm *tm;
+        char fecha[100];
+        tm = localtime(&masterBoot.mbr_date_created);
+        strftime(fecha,100,"%d/%m/%y %H:%S",tm);
+        fprintf(graphDot,"<tr>  <td><b>mbr_fecha_creacion</b></td> <td>%s</td>  </tr>\n",fecha);
+        fprintf(graphDot,"<tr>  <td><b>mbr_disk_signature</b></td> <td>%d</td>  </tr>\n",masterBoot.mbr_disk_signature);
+        fprintf(graphDot,"<tr>  <td><b>Disk_fit</b></td> <td>%c</td>  </tr>\n",masterBoot.mbr_disk_fit);
+
+        int index_Extendida = -1;
+        for (int i = 0; i < 4; i++){
+            if(masterBoot.mbr_partition[i].part_start!=-1 && masterBoot.mbr_partition[i].part_status!=1){
+                if(masterBoot.mbr_partition[i].part_type == 'E'){
+                    index_Extendida = i;
+                }
+                char status[3];
+                if(masterBoot.mbr_partition[i].part_status == 0) strcpy(status,"0");
+                fprintf(graphDot,"<tr>  <td><b>part_status_%d</b></td> <td>%s</td>  </tr>\n",i,status);
+                fprintf(graphDot,"<tr>  <td><b>part_type_%d</b></td> <td>%c</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_type);
+                fprintf(graphDot,"<tr>  <td><b>part_fit_%d</b></td> <td>%c</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_fit);
+                fprintf(graphDot,"<tr>  <td><b>part_start_%d</b></td> <td>%d</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_start);
+                fprintf(graphDot,"<tr>  <td><b>part_size_%d</b></td> <td>%d</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_size);
+                fprintf(graphDot,"<tr>  <td><b>part_name_%d</b></td> <td>%s</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_name);
+            }
+        }
+
+        fprintf(graphDot,"</table>\n");
+        fprintf(graphDot, ">];\n}\n");
+
+        if(index_Extendida != -1){
+
+        }
+        fprintf(graphDot,"}\n");
+        fclose(graphDot);
+        fclose(fp);
+        string comando = "dot -T"+extension.toStdString()+" grafica.dot -o "+destino.toStdString();
+        system(comando.c_str());
     }
 }
 

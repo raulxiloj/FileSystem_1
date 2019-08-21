@@ -9,10 +9,15 @@ ListaMount::ListaMount(){
 */
 void ListaMount::insertarNodo(NodoMount *nuevo){
     NodoMount *aux = primero;
-    while(aux->siguiente!=nullptr){
-        aux = aux->siguiente;
+    if(primero == nullptr){
+        primero = nuevo;
+    }else{
+        while(aux->siguiente!=nullptr){
+            aux = aux->siguiente;
+        }
+        aux->siguiente = nuevo;
     }
-    aux->siguiente = nuevo;
+
 }
 
 /* Funcion para eliminar un nodo de la lista
@@ -51,7 +56,7 @@ int ListaMount::eliminarNodo(QString ID){
 int ListaMount::buscarLetra(QString direccion, QString nombre){
     NodoMount *aux = primero;
     int retorno = 'a';
-    while(aux!=nullptr){
+    while(aux!=NULL){
         if((direccion == aux->direccion) && (nombre == aux->nombre)){
             return -1;
         }else{

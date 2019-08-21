@@ -25,7 +25,7 @@ int Nodo::getTipo()
     if(this->tipo=="delete")return 14;
     if(this->tipo=="name")return 15;
     if(this->tipo=="add")return 16;
-    if(this->tipo == "ID")return 17;
+    if(this->tipo == "id")return 17;
     if(this->tipo=="COM")return 18;
     return 0;
 }
