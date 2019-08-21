@@ -533,7 +533,11 @@ void recorrerFDISK(Nodo *raiz)
                     if(flagSize || flagDelete){
                         cout << "ERROR: Parametros -size|-delete demas" << endl;
                     }else{
-                        agregarQuitarParticion(valPath,valName,valAdd,valUnit);
+                        if(flagUnit){
+                            agregarQuitarParticion(valPath,valName,valAdd,valUnit);
+                        }else{
+                            cout << "ERROR parametro -unit no definido "<< endl;
+                        }
                     }
                 }else if(flagDelete){
                     if(flagSize || flagAdd || flagFit || flagType){
@@ -1267,10 +1271,106 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
 void agregarQuitarParticion(QString direccion, QString nombre, int add, char unit){
     string auxPath = direccion.toStdString();
     string auxNombre = nombre.toStdString();
+    int size_Bytes = 0;
+    QString tipo = "";
+
+    if(add < 0)
+        tipo = "add";
+
+    if(tipo != "add")
+        add = add*(-1);
+
+    if(unit == 'm')
+        size_Bytes = add * 1024 * 1024;
+    else if(unit == 'k')
+        size_Bytes = add * 1024;
+    else
+        size_Bytes = add;
+
     FILE *fp;
     if((fp = fopen(auxPath.c_str(), "rb+"))){
-        MBR masterboot;
+        //Verificar que la particion no este montada
+        bool mount = lista->buscarNodo(direccion,nombre);
+        if(!mount){
+            MBR masterboot;
+            fseek(fp,0,SEEK_SET);
+            fread(&masterboot,sizeof(MBR),1,fp);
+            int index = -1;
+            int index_Extendida = -1;
+            bool flagExtendida = false;
+            //Buscamos la particion primaria/extendida
+            for(int i = 0; i < 4; i++){
+                if((strcmp(masterboot.mbr_partition[i].part_name, auxNombre.c_str())) == 0){
+                    index = i;
+                    if(masterboot.mbr_partition[i].part_type == 'E')
+                        flagExtendida = true;
+                    break;
+                }else if(masterboot.mbr_partition[i].part_type == 'E'){
+                    index_Extendida = i;
+                }
+            }
+            if(index != -1){//Si se encontro en las principales
+                if(!flagExtendida){//Primaria
+                    if(tipo == "add"){//Agregar
+                        //Verificar que exista espacio libre a la derecha
+                        if(index == 3){
+                            //No se puede
+                        }else{
+                            if(masterboot.mbr_partition[index + 1].part_status == 1){
+                                if(masterboot.mbr_partition[index + 1].part_size >= size_Bytes){
+                                    masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
+                                    masterboot.mbr_partition[index + 1].part_size = (masterboot.mbr_partition[index + 1].part_size - size_Bytes);
+                                    masterboot.mbr_partition[index + 1].part_start = masterboot.mbr_partition[index + 1].part_start + size_Bytes;
+                                    fseek(fp,0,SEEK_SET);
+                                    fwrite(&masterboot,sizeof(MBR),1,fp);
+                                    cout << "Se agrego espacio a la particion de manera exitosa" << endl;
+                                }else{
+                                    cout << "ERROR no es posible agregar espacio a la particion porque no hay suficiente espacio disponible a su derecha" << endl;
+                                }
+                            }else{
+                                cout << "ERROR no es posible agregar espacio a la particion porque no hay espacio disponible a su derecha" << endl;
+                            }
+                        }
+                    }else{//Quitar
 
+                    }
+                }else{//Extendida
+                    if(tipo == "add"){//Agregar
+                        //Verificar que exista espacio libre a la derecha
+                        if(index == 3){
+                            //No se puede
+                        }else{
+                            if(masterboot.mbr_partition[index + 1].part_status == 1){
+                                if(masterboot.mbr_partition[index + 1].part_size >= size_Bytes){
+                                    masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
+                                    masterboot.mbr_partition[index + 1].part_size = (masterboot.mbr_partition[index + 1].part_size - size_Bytes);
+                                    masterboot.mbr_partition[index + 1].part_start = masterboot.mbr_partition[index + 1].part_start + size_Bytes;
+                                    fseek(fp,0,SEEK_SET);
+                                    fwrite(&masterboot,sizeof(MBR),1,fp);
+                                    cout << "Se agrego espacio a la particion de manera exitosa" << endl;
+                                }else{
+                                    cout << "ERROR no es posible agregar espacio a la particion porque no hay suficiente espacio disponible a su derecha" << endl;
+                                }
+                            }else{
+                                cout << "ERROR no es posible agregar espacio a la particion porque no hay espacio disponible a su derecha" << endl;
+                            }
+                        }
+                    }else{//Quitar
+
+                    }
+                }
+            }else{//Posiblemente logica
+                if(index_Extendida != -1){
+
+                }else{
+                    cout << "ERROR no se encuentra la particion a redimensionar" << endl;
+                }
+
+            }
+        }else{
+             cout << "ERROR desmote primero la particion para poder redimensionar" << endl;
+        }
+    fclose(fp);
     }else{
         cout << "ERROR el disco donde se desea agregar/quitar unidades no existe" << endl;
     }
