@@ -930,7 +930,7 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
         if(!flagExtendida){
             //Verificar si existe una particion disponible
             for(int i = 0; i < 4; i++){
-                if(masterboot.mbr_partition[i].part_start == -1 || (masterboot.mbr_partition[i].part_size>=size_bytes && masterboot.mbr_partition[i].part_status == 1)){
+                if(masterboot.mbr_partition[i].part_start == -1 || (masterboot.mbr_partition[i].part_status == 1 && masterboot.mbr_partition[i].part_size>=size_bytes)){
                     flagParticion = true;
                     numParticion = i;
                     break;
@@ -954,7 +954,7 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
                             if(numParticion == 0){
                                 masterboot.mbr_partition[numParticion].part_start = sizeof(masterboot);
                             }else{
-                                masterboot.mbr_partition[numParticion].part_start = masterboot.mbr_partition[numParticion-1].part_size + masterboot.mbr_partition[numParticion-1].part_start;
+                                masterboot.mbr_partition[numParticion].part_start =  masterboot.mbr_partition[numParticion-1].part_start + masterboot.mbr_partition[numParticion-1].part_size;
                             }
                             masterboot.mbr_partition[numParticion].part_size = size_bytes;
                             masterboot.mbr_partition[numParticion].part_status = 0;
@@ -1226,7 +1226,10 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
                         }
                         if(flag){
                             if(typeDelete == "fast"){
-
+                                extendedBoot.part_status = 1;
+                                strcpy(extendedBoot.part_name, "");
+                                fseek(fp, ftell(fp)-sizeof(EBR),SEEK_SET);
+                                fwrite(&extendedBoot,sizeof(EBR),1,fp);
                             }else{//full
                                 extendedBoot.part_status = 1;
                                 strcpy(extendedBoot.part_name, "");
