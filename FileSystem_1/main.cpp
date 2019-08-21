@@ -1507,8 +1507,8 @@ void graficarMBR(QString direccion, QString destino, QString extension){
         graphDot = fopen("grafica.dot", "w");
         fprintf(graphDot,"digraph G{ \n");
         fprintf(graphDot,"subgraph cluster{\n label=\"MBR\"");
-        fprintf(graphDot,"\nNodo[shape=box,label=<\n");
-        fprintf(graphDot,"<table border=\'0\' cellborder=\'1\' width=\'300\'  height=\'200\' >\n");
+        fprintf(graphDot,"\ntbl[shape=box,label=<\n");
+        fprintf(graphDot,"<table border=\'0\' cellborder=\'1\' cellspacing=\'0\' width=\'300\'  height=\'200\' >\n");
         fprintf(graphDot, "<tr>  <td width=\'150\'> <b>Nombre</b> </td> <td width=\'150\'> <b>Valor</b> </td>  </tr>\n");
         MBR masterBoot;
         fseek(fp,0,SEEK_SET);
@@ -1544,7 +1544,33 @@ void graficarMBR(QString direccion, QString destino, QString extension){
         fprintf(graphDot, ">];\n}\n");
 
         if(index_Extendida != -1){
+            int index_ebr = 1;
+            EBR extendedBoot;
+            fseek(fp,masterBoot.mbr_partition[index_Extendida].part_start,SEEK_SET);
+            while(fread(&extendedBoot,sizeof(EBR),1,fp)!=0 && (ftell(fp) < masterBoot.mbr_partition[index_Extendida].part_start + masterBoot.mbr_partition[index_Extendida].part_size)) {
+                if(extendedBoot.part_status != 1){
+                    fprintf(graphDot,"subgraph cluster_%d{\n label=\"EBR_%d\"\n",index_ebr,index_ebr);
+                    fprintf(graphDot,"\ntbl_%d[shape=box, label=<\n ",index_ebr);
+                    fprintf(graphDot, "<table border=\'0\' cellborder=\'1\' cellspacing=\'0\'  width=\'300\' height=\'160\' >\n ");
+                    fprintf(graphDot, "<tr>  <td width=\'150\'><b>Nombre</b></td> <td width=\'150\'><b>Valor</b></td>  </tr>\n");
+                    char status[3];
+                    if(extendedBoot.part_status == 0) strcpy(status,"0");
+                    fprintf(graphDot, "<tr>  <td><b>part_status_1</b></td> <td>%s</td>  </tr>\n",status);
+                    fprintf(graphDot, "<tr>  <td><b>part_fit_1</b></td> <td>%c</td>  </tr>\n",extendedBoot.part_fit);
+                    fprintf(graphDot, "<tr>  <td><b>part_start_1</b></td> <td>%d</td>  </tr>\n",extendedBoot.part_start);
+                    fprintf(graphDot, "<tr>  <td><b>part_size_1</b></td> <td>%d</td>  </tr>\n",extendedBoot.part_size);
+                    fprintf(graphDot, "<tr>  <td><b>part_next_1</b></td> <td>%d</td>  </tr>\n",extendedBoot.part_next);
+                    fprintf(graphDot, "<tr>  <td><b>part_name_1</b></td> <td>%s</td>  </tr>\n",extendedBoot.part_name);
+                    fprintf(graphDot, "</table>\n");
+                    fprintf(graphDot, ">];\n}\n");
+                    index_ebr++;
+                }
 
+                if(extendedBoot.part_next == -1)
+                    break;
+                else
+                    fseek(fp,extendedBoot.part_next,SEEK_SET);
+            }
         }
         fprintf(graphDot,"}\n");
         fclose(graphDot);
