@@ -819,7 +819,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
         fread(&masterboot,sizeof(MBR),1,fp);
         //Verificar si existe una particion disponible
         for(int i = 0; i < 4; i++){
-            if(masterboot.mbr_partition[i].part_start == -1 || (masterboot.mbr_partition[i].part_size>=size_bytes && masterboot.mbr_partition[i].part_status == 1)){
+            if(masterboot.mbr_partition[i].part_start == -1 || (masterboot.mbr_partition[i].part_status == 1 && masterboot.mbr_partition[i].part_size>=size_bytes)){
                 flagParticion = true;
                 numParticion = i;
                 break;
@@ -830,9 +830,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
             //Verificar el espacio libre del disco
             int espacioUsado = 0;
             for(int i = 0; i < 4; i++){
-                if(masterboot.mbr_partition[i].part_status!=1){
-                    espacioUsado += masterboot.mbr_partition[i].part_size;
-                }
+                espacioUsado += masterboot.mbr_partition[i].part_size;
             }
             cout << "Espacio disponible: " << (masterboot.mbr_size - espacioUsado) << " Bytes" << endl;
             cout << "Espacio necesario:  " << size_bytes << " Bytes" << endl;
@@ -846,7 +844,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
                         if(numParticion == 0){
                             masterboot.mbr_partition[numParticion].part_start = sizeof(masterboot);
                         }else{
-                            masterboot.mbr_partition[numParticion].part_start = masterboot.mbr_partition[numParticion-1].part_size + masterboot.mbr_partition[numParticion-1].part_start;
+                            masterboot.mbr_partition[numParticion].part_start = masterboot.mbr_partition[numParticion-1].part_start + masterboot.mbr_partition[numParticion-1].part_size;
                         }
                         masterboot.mbr_partition[numParticion].part_size = size_bytes;
                         masterboot.mbr_partition[numParticion].part_status = 0;
@@ -854,7 +852,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
                         //Se guarda de nuevo el MBR
                         fseek(fp,0,SEEK_SET);
                         fwrite(&masterboot,sizeof(MBR),1,fp);
-                        //Se guarda la particion
+                        //Se guardan los bytes de la particion
                         fseek(fp,masterboot.mbr_partition[numParticion].part_start,SEEK_SET);
                         for(int i = 0; i < size_bytes; i++){
                             fwrite(&buffer,1,1,fp);
@@ -1159,7 +1157,7 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
             fseek(fp,0,SEEK_SET);
             fread(&masterboot,sizeof (MBR),1,fp);
             int index = -1;
-            int index_Extendida = 0;
+            int index_Extendida = -1;
             bool flagExtendida = false;
             string opcion = "";
             char buffer = '\0';
@@ -1210,10 +1208,36 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
                         }
                     }
                 }else{//Si es una particion logica
-                    bool flag = false;//Bandera para saber si existe
+                    if(index_Extendida != -1){
+                        bool flag = false;//Bandera para saber si existe
+                        EBR extendedBoot;
+                        fseek(fp,masterboot.mbr_partition[index_Extendida].part_start, SEEK_SET);
+                        fread(&extendedBoot,sizeof(EBR),1,fp);
+                        if(extendedBoot.part_size!=0){
+                            fseek(fp, masterboot.mbr_partition[index_Extendida].part_start,SEEK_SET);
+                            while((fread(&extendedBoot,sizeof(EBR),1,fp))!=0 && (ftell(fp) < (masterboot.mbr_partition[index_Extendida].part_start + masterboot.mbr_partition[index_Extendida].part_size))) {
+                                if(strcmp(extendedBoot.part_name,nombre.toStdString().c_str()) == 0 && extendedBoot.part_status != 1){
+                                    flag = true;
+                                    break;
+                                }else if(extendedBoot.part_next == -1){//Ya es la ultima y no se encontro
+                                    break;
+                                }
+                            }
+                        }
+                        if(flag){
+                            if(typeDelete == "fast"){
 
-                    if(flag){
-
+                            }else{//full
+                                extendedBoot.part_status = 1;
+                                strcpy(extendedBoot.part_name, "");
+                                fseek(fp, ftell(fp)-sizeof(EBR),SEEK_SET);
+                                fwrite(&extendedBoot,sizeof(EBR),1,fp);
+                                fwrite(&buffer,1,extendedBoot.part_size,fp);
+                                cout << "Particion logica eliminada con exito" << endl;
+                            }
+                        }else{
+                            cout << "ERROR no se encuentra la particion a eliminar" << endl;
+                        }
                     }else{
                         cout << "ERROR no se encuentra la particion a eliminar" << endl;
                     }
