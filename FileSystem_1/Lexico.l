@@ -64,11 +64,7 @@ INITIAL
     .            {std::cout <<yytext <<" Error Lexico" << std::endl;}
 }
 
-<COM>"\n"        { BEGIN INITIAL;
-                   strcpy(yylval.text, coment);
-                   memset(coment,0,400);
-                   return comentario;
-                 };
-<COM>.           { strcat(coment, yytext); };
+<COM>"\n"        { BEGIN INITIAL; /*strcpy(yylval.text, coment); memset(coment,0,400); return comentario;*/ };
+<COM>.           { /*strcat(coment, yytext);*/ };
 
 %%

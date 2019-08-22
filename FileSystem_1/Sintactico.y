@@ -54,7 +54,6 @@
 %token <text> cadena
 %token <text> identificador
 %token <text> ruta
-%token <text> comentario
 
 /*----------Not terminals------------*/
 %type <nodito> INIT
@@ -95,8 +94,7 @@ COMANDO: mkdisk MKDISK {
          | rep REP { $$ = new Nodo("REP","");
                      $$->add(*$2);
                    }
-         | SCRIPT { $$ = $1; }
-         | comentario { $$ = new Nodo("COM", $1); } ;
+         | SCRIPT { $$ = $1; };
 
 
 

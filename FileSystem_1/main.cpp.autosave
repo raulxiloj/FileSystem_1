@@ -1548,6 +1548,7 @@ void graficarDisco(QString direccion, QString destino, QString extension){
                         while(fread(&extendedBoot,sizeof (EBR),1,fp)!=0 && (ftell(fp) < (masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size))){
                             parcial = extendedBoot.part_size;
                             porcentaje_real = (parcial*100)/total;
+                            
                             cout << "Porcentaje " << porcentaje_real << endl;
                             if(porcentaje_real!=0){
                                 if(extendedBoot.part_status != '1'){

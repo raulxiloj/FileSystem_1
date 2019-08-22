@@ -1064,23 +1064,19 @@ case 35:
 /* rule 35 can match eol */
 YY_RULE_SETUP
 #line 67 "Lexico.l"
-{ BEGIN INITIAL;
-                   strcpy(yylval.text, coment);
-                   memset(coment,0,400);
-                   return comentario;
-                 };
+{ BEGIN INITIAL; /*strcpy(yylval.text, coment); memset(coment,0,400); return comentario;*/ };
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 72 "Lexico.l"
-{ strcat(coment, yytext); };
+#line 68 "Lexico.l"
+{ /*strcat(coment, yytext);*/ };
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 74 "Lexico.l"
+#line 70 "Lexico.l"
 ECHO;
 	YY_BREAK
-#line 1084 "scanner.cpp"
+#line 1080 "scanner.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COM):
 	yyterminate();
@@ -2086,6 +2082,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 74 "Lexico.l"
+#line 70 "Lexico.l"
 
 
