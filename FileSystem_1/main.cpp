@@ -302,9 +302,9 @@ void recorrerMKDISK(Nodo *raiz)
 
                 //Se inicializan las particiones en el MBR
                 for(int p = 0; p < 4; p++){
-                    masterboot.mbr_partition[p].part_status = 0;
-                    masterboot.mbr_partition[p].part_type = 0;
-                    masterboot.mbr_partition[p].part_fit = 0;
+                    masterboot.mbr_partition[p].part_status = '0';
+                    masterboot.mbr_partition[p].part_type = '0';
+                    masterboot.mbr_partition[p].part_fit = '0';
                     masterboot.mbr_partition[p].part_size = 0;
                     masterboot.mbr_partition[p].part_start = -1;
                     strcpy(masterboot.mbr_partition[p].part_name,"");
@@ -317,12 +317,14 @@ void recorrerMKDISK(Nodo *raiz)
                 fseek(fp,0,SEEK_SET);
                 fwrite(&masterboot,sizeof(MBR),1,fp);
                 fclose(fp);
+                cout << endl;
+                cout << "Disco creado con exito" << endl;
             }else{
                 cout << "ERROR Parametro -size no definido " << endl;
             }
 
         }else{
-            cout << "ERROR Parametro -path  no definido" << endl;
+            cout << "<< ERROR Parametro -path  no definido" << endl;
         }
     }
 
@@ -340,7 +342,7 @@ void recorrerRMDISK(Nodo *raiz)
         if(opcion.compare("Y") == 0 || opcion.compare("y") == 0){
             string comando = "rm \""+valPath.toStdString()+"\"";
             system(comando.c_str());
-            cout << "Disco eliminado con exito" << endl;
+            cout <<"Disco eliminado con exito" << endl;
         }else if(opcion.compare("N") || opcion.compare("n") == 0){
             cout << "Cancelado con exito" << endl;;
         }else{
@@ -382,14 +384,14 @@ void recorrerFDISK(Nodo *raiz)
         case SIZE:
         {
             if(flagSize){
-                cout << "ERROR: Parametro -size ya definido" << endl;
+                cout << "<< ERROR: Parametro -size ya definido" << endl;
                 flag = true;
                 break;
             }
             flagSize = true;
             valSize = n.valor.toInt();
             if(!(valSize > 0)){
-                cout << "ERROR: parametro -size menor a cero" << endl;
+                cout << "<< ERROR: parametro -size menor a cero" << endl;
                 flag = true;
                 break;
             }
@@ -398,7 +400,7 @@ void recorrerFDISK(Nodo *raiz)
         case UNIT:
         {
             if(flagUnit){
-                cout << "ERROR: Parametro -unit ya definido" << endl;
+                cout << "<< ERROR: Parametro -unit ya definido" << endl;
                 flag = true;
                 break;
             }
@@ -412,7 +414,7 @@ void recorrerFDISK(Nodo *raiz)
             }else if(valUnit == 'M' || valUnit == 'm'){
                 valUnit = 'm';
             }else{
-                cout << "ERROR: Valor del parametro unit no reconocido" << endl;
+                cout << "<< ERROR: Valor del parametro unit no reconocido" << endl;
                 flag = true;
                 break;
             }
@@ -422,7 +424,7 @@ void recorrerFDISK(Nodo *raiz)
         case PATH:
         {
             if(flagPath){
-                cout << "ERROR: Parametro -path ya definido" << endl;
+                cout << "<< ERROR: Parametro -path ya definido" << endl;
                 flag = true;
                 break;
             }
@@ -434,7 +436,7 @@ void recorrerFDISK(Nodo *raiz)
         case TYPE:
         {
             if(flagType){
-                cout << "ERROR: Parametro -type ya definido" << endl;
+                cout << "<< ERROR: Parametro -type ya definido" << endl;
                 flag = true;
                 break;
             }
@@ -448,7 +450,7 @@ void recorrerFDISK(Nodo *raiz)
             }else if(valType == 'L' || valType == 'l'){
                 valType = 'L';
             }else{
-                cout << "ERROR: Valor del parametro -type no reconocido" << endl;
+                cout << "<< ERROR: Valor del parametro -type no reconocido" << endl;
                 flag = true;
                 break;
             }
@@ -458,7 +460,7 @@ void recorrerFDISK(Nodo *raiz)
         {
             if(flagFit)
             {
-                cout << "ERROR: Parametro -fit ya definido" << endl;
+                cout << "<< ERROR: Parametro -fit ya definido" << endl;
                 flag = true;
                 //ERROR
             }
@@ -476,7 +478,7 @@ void recorrerFDISK(Nodo *raiz)
         case DELETE:
         {
             if(flagDelete){
-                cout << "ERROR: Parametro -delete ya definido" << endl;
+                cout << "<< ERROR: Parametro -delete ya definido" << endl;
                 flag = true;
                 break;
             }
@@ -487,7 +489,7 @@ void recorrerFDISK(Nodo *raiz)
         case NAME:
         {
             if(flagName){
-                cout << "ERROR: Parametro -name ya definido" << endl;
+                cout << "<< ERROR: Parametro -name ya definido" << endl;
                 flag = true;
                 break;
             }
@@ -499,7 +501,7 @@ void recorrerFDISK(Nodo *raiz)
         case ADD:
         {
             if(flagAdd){
-                cout << "ERROR: Parametro -add ya definido" << endl;
+                cout << "<< ERROR: Parametro -add ya definido" << endl;
                 flag = true;
                 break;
             }
@@ -515,7 +517,7 @@ void recorrerFDISK(Nodo *raiz)
             if(flagName){//Parametro obligatorio
                 if(flagSize){//Parametro obligatorio al crear una particion
                     if(flagDelete || flagAdd){
-                        cout << "ERROR: Parametro -delete|-add demas" << endl;
+                        cout << "<< ERROR: Parametro -delete|-add demas" << endl;
                     }else{
                         if(flagType){//Si especifica tipo de particion
                             if(valType == 'P'){
@@ -531,26 +533,26 @@ void recorrerFDISK(Nodo *raiz)
                     }
                 }else if(flagAdd){
                     if(flagSize || flagDelete){
-                        cout << "ERROR: Parametros -size|-delete demas" << endl;
+                        cout << "<< ERROR: Parametros -size|-delete demas" << endl;
                     }else{
                         if(flagUnit){
                             agregarQuitarParticion(valPath,valName,valAdd,valUnit);
                         }else{
-                            cout << "ERROR parametro -unit no definido "<< endl;
+                            cout << "<< ERROR parametro -unit no definido "<< endl;
                         }
                     }
                 }else if(flagDelete){
                     if(flagSize || flagAdd || flagFit || flagType){
-                        cout << "ERROR: Parametros demas" << endl;
+                        cout << "<< ERROR: Parametros demas" << endl;
                     }else{
                         eliminarParticion(valPath,valName,valDelete);
                     }
                 }
             }else {
-                cout << "ERROR parametro -name no definido" << endl;
+                cout << "<< ERROR parametro -name no definido" << endl;
             }
         }else{
-            cout << "ERROR parametro -path no definido" << endl;
+            cout << "<< ERROR parametro -path no definido" << endl;
         }
     }
 }
@@ -596,6 +598,7 @@ void recorrerMOUNT(Nodo *raiz){
         if(flagPath){//Parametro obligatorio
             if(flagName){//Parametro obligtaorio
                 int indexP = buscarParticion_P_E(valPath,valName);
+                cout << "INDEX ENCONTRADO " << indexP << endl;
                 if(indexP != -1){
                     FILE *fp;
                     if((fp = fopen(valPath.toStdString().c_str(),"rb+"))){
@@ -621,8 +624,37 @@ void recorrerMOUNT(Nodo *raiz){
                     }else{
                         cout << "ERROR no se encuentra el disco" << endl;
                     }
-                }else{
+                }else{//Posiblemente logica
+                    int indexP = buscarParticion_L(valPath,valName);
+                    if(indexP != -1){
+                        FILE *fp;
+                        if((fp = fopen(valPath.toStdString().c_str(), "rb+"))){
+                            EBR extendedBoot;
+                            fseek(fp, indexP, SEEK_SET);
+                            fread(&extendedBoot, sizeof(EBR),1,fp);
+                            extendedBoot.part_status = '2';
+                            fseek(fp,indexP,SEEK_SET);
+                            fwrite(&extendedBoot,sizeof(EBR),1, fp);
+                            fclose(fp);
 
+                            int letra = lista->buscarLetra(valPath,valName);
+                            if(letra == -1){
+                                cout << "ERROR la particion ya esta montada" << endl;
+                            }else{
+                                int num = lista->buscarNumero(valPath,valName);
+                                char auxLetra = static_cast<char>(letra);
+                                string id = "vd";
+                                id += auxLetra + to_string(num);
+                                NodoMount *n = new NodoMount(valPath, valName, auxLetra, num);
+                                lista->insertarNodo(n);
+                                cout << "Particion " + valName.toStdString() + " montada con exito" << endl;
+                            }
+                        }else{
+                            cout << "ERROR no se encuentra el disco" << endl;
+                        }
+                    }else{
+                        cout << "ERROR no se encuentra la particion a montar" << endl;
+                    }
                 }
 
             }else{
@@ -823,7 +855,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
         fread(&masterboot,sizeof(MBR),1,fp);
         //Verificar si existe una particion disponible
         for(int i = 0; i < 4; i++){
-            if(masterboot.mbr_partition[i].part_start == -1 || (masterboot.mbr_partition[i].part_status == 1 && masterboot.mbr_partition[i].part_size>=size_bytes)){
+            if(masterboot.mbr_partition[i].part_start == -1 || (masterboot.mbr_partition[i].part_status == '1' && masterboot.mbr_partition[i].part_size>=size_bytes)){
                 flagParticion = true;
                 numParticion = i;
                 break;
@@ -851,7 +883,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
                             masterboot.mbr_partition[numParticion].part_start = masterboot.mbr_partition[numParticion-1].part_start + masterboot.mbr_partition[numParticion-1].part_size;
                         }
                         masterboot.mbr_partition[numParticion].part_size = size_bytes;
-                        masterboot.mbr_partition[numParticion].part_status = 0;
+                        masterboot.mbr_partition[numParticion].part_status = '0';
                         strcpy(masterboot.mbr_partition[numParticion].part_name,nombre.toStdString().c_str());
                         //Se guarda de nuevo el MBR
                         fseek(fp,0,SEEK_SET);
@@ -934,7 +966,7 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
         if(!flagExtendida){
             //Verificar si existe una particion disponible
             for(int i = 0; i < 4; i++){
-                if(masterboot.mbr_partition[i].part_start == -1 || (masterboot.mbr_partition[i].part_status == 1 && masterboot.mbr_partition[i].part_size>=size_bytes)){
+                if(masterboot.mbr_partition[i].part_start == -1 || (masterboot.mbr_partition[i].part_status == '1' && masterboot.mbr_partition[i].part_size>=size_bytes)){
                     flagParticion = true;
                     numParticion = i;
                     break;
@@ -961,7 +993,7 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
                                 masterboot.mbr_partition[numParticion].part_start =  masterboot.mbr_partition[numParticion-1].part_start + masterboot.mbr_partition[numParticion-1].part_size;
                             }
                             masterboot.mbr_partition[numParticion].part_size = size_bytes;
-                            masterboot.mbr_partition[numParticion].part_status = 0;
+                            masterboot.mbr_partition[numParticion].part_status = '0';
                             strcpy(masterboot.mbr_partition[numParticion].part_name,nombre.toStdString().c_str());
                             //Se guarda de nuevo el MBR
                             fseek(fp,0,SEEK_SET);
@@ -970,7 +1002,7 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
                             fseek(fp, masterboot.mbr_partition[numParticion].part_start,SEEK_SET);
                             EBR extendedBoot;
                             extendedBoot.part_fit = auxFit;
-                            extendedBoot.part_status = 0;
+                            extendedBoot.part_status = '0';
                             extendedBoot.part_start = masterboot.mbr_partition[numParticion].part_start;
                             extendedBoot.part_size = 0;
                             extendedBoot.part_next = -1;
@@ -1059,8 +1091,8 @@ void crearParticionLogica(QString direccion, QString nombre, int size, char fit,
                     cout << "ERROR la particion logica a crear excede el " << endl;
                     cout << "espacio disponible de la particion extendida" << endl;
                 }else{
-                    extendedBoot.part_status = 0;
-                    extendedBoot.part_status = auxFit;
+                    extendedBoot.part_status = '0';
+                    extendedBoot.part_fit = auxFit;
                     extendedBoot.part_start = ftell(fp) - sizeof(EBR); //Para regresar al inicio de la extendida
                     extendedBoot.part_size = size_bytes;
                     extendedBoot.part_next = -1;
@@ -1182,12 +1214,12 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
                 if(index != -1){//Si se encontro en las principales
                     if(!flagExtendida){//primaria
                         if(typeDelete == "fast"){
-                            masterboot.mbr_partition[index].part_status = 1;
+                            masterboot.mbr_partition[index].part_status = '1';
                             strcpy(masterboot.mbr_partition[index].part_name,"");
                             fseek(fp,0,SEEK_SET);
                             fwrite(&masterboot,sizeof(MBR),1,fp);
                         }else{//full
-                            masterboot.mbr_partition[index].part_status = 1;
+                            masterboot.mbr_partition[index].part_status = '1';
                             strcpy(masterboot.mbr_partition[index].part_name,"");
                             fseek(fp,0,SEEK_SET);
                             fwrite(&masterboot,sizeof(MBR),1,fp);
@@ -1197,12 +1229,12 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
                         }
                     }else{//extendida
                         if(typeDelete == "fast"){
-                            masterboot.mbr_partition[index].part_status = 1;
+                            masterboot.mbr_partition[index].part_status = '1';
                             strcpy(masterboot.mbr_partition[index].part_name,"");
                             fseek(fp,0,SEEK_SET);
                             fwrite(&masterboot,sizeof(MBR),1,fp);
                         }else{//full
-                            masterboot.mbr_partition[index].part_status = 1;
+                            masterboot.mbr_partition[index].part_status = '1';
                             strcpy(masterboot.mbr_partition[index].part_name,"");
                             fseek(fp,0,SEEK_SET);
                             fwrite(&masterboot,sizeof(MBR),1,fp);
@@ -1220,7 +1252,7 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
                         if(extendedBoot.part_size!=0){
                             fseek(fp, masterboot.mbr_partition[index_Extendida].part_start,SEEK_SET);
                             while((fread(&extendedBoot,sizeof(EBR),1,fp))!=0 && (ftell(fp) < (masterboot.mbr_partition[index_Extendida].part_start + masterboot.mbr_partition[index_Extendida].part_size))) {
-                                if(strcmp(extendedBoot.part_name,nombre.toStdString().c_str()) == 0 && extendedBoot.part_status != 1){
+                                if(strcmp(extendedBoot.part_name,nombre.toStdString().c_str()) == 0 && extendedBoot.part_status != '1'){
                                     flag = true;
                                     break;
                                 }else if(extendedBoot.part_next == -1){//Ya es la ultima y no se encontro
@@ -1230,12 +1262,12 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
                         }
                         if(flag){
                             if(typeDelete == "fast"){
-                                extendedBoot.part_status = 1;
+                                extendedBoot.part_status = '1';
                                 strcpy(extendedBoot.part_name, "");
                                 fseek(fp, ftell(fp)-sizeof(EBR),SEEK_SET);
                                 fwrite(&extendedBoot,sizeof(EBR),1,fp);
                             }else{//full
-                                extendedBoot.part_status = 1;
+                                extendedBoot.part_status = '1';
                                 strcpy(extendedBoot.part_name, "");
                                 fseek(fp, ftell(fp)-sizeof(EBR),SEEK_SET);
                                 fwrite(&extendedBoot,sizeof(EBR),1,fp);
@@ -1316,7 +1348,7 @@ void agregarQuitarParticion(QString direccion, QString nombre, int add, char uni
                         if(index == 3){
                             //No se puede
                         }else{
-                            if(masterboot.mbr_partition[index + 1].part_status == 1){
+                            if(masterboot.mbr_partition[index + 1].part_status == '1'){
                                 if(masterboot.mbr_partition[index + 1].part_size >= size_Bytes){
                                     masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
                                     masterboot.mbr_partition[index + 1].part_size = (masterboot.mbr_partition[index + 1].part_size - size_Bytes);
@@ -1340,7 +1372,7 @@ void agregarQuitarParticion(QString direccion, QString nombre, int add, char uni
                         if(index == 3){
                             //No se puede
                         }else{
-                            if(masterboot.mbr_partition[index + 1].part_status == 1){
+                            if(masterboot.mbr_partition[index + 1].part_status == '1'){
                                 if(masterboot.mbr_partition[index + 1].part_size >= size_Bytes){
                                     masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
                                     masterboot.mbr_partition[index + 1].part_size = (masterboot.mbr_partition[index + 1].part_size - size_Bytes);
@@ -1390,8 +1422,10 @@ int buscarParticion_P_E(QString direccion, QString nombre){
         fseek(fp,0,SEEK_SET);
         fread(&masterboot,sizeof(MBR),1,fp);
         for(int i = 0; i < 4; i++){
-            if(strcmp(masterboot.mbr_partition[i].part_name,auxName.c_str())){
-                return i;
+            if(masterboot.mbr_partition[i].part_status != '1'){
+                if(strcmp(masterboot.mbr_partition[i].part_name,auxName.c_str()) == 0){
+                    return i;
+                }
             }
         }
 
@@ -1422,8 +1456,13 @@ int buscarParticion_L(QString direccion, QString nombre){
         if(extendida != -1){
             EBR extendedBoot;
             fseek(fp, masterboot.mbr_partition[extendida].part_start,SEEK_SET);
-
+            while(fread(&extendedBoot,sizeof(EBR),1,fp)!=0 && (ftell(fp) < masterboot.mbr_partition[extendida].part_start + masterboot.mbr_partition[extendida].part_size)){
+                if(strcmp(extendedBoot.part_name, auxName.c_str()) == 0){
+                    return (ftell(fp) - sizeof(EBR));
+                }
+            }
         }
+        fclose(fp);
     }
     return -1;
 }
@@ -1467,8 +1506,8 @@ void graficarDisco(QString direccion, QString destino, QString extension){
             double porcentaje2 = (porcentaje*500)/100;
             espacioUsado += porcentaje2;
             //Buscamos las particiones que no esten vacias
-            if((masterboot.mbr_partition[i].part_start != -1) && (masterboot.mbr_partition[i].part_status != 0)){
-                if(masterboot.mbr_partition[i].part_status != 1){
+            if((masterboot.mbr_partition[i].part_start != -1) && (masterboot.mbr_partition[i].part_status != '0')){
+                if(masterboot.mbr_partition[i].part_status != '1'){
                     if(masterboot.mbr_partition[i].part_type == 'P'){
                         fprintf(graphDot, "<TD HEIGHT=\"200\" WIDTH=\"%f\">PRIMARIA <br/> Ocupado: %f%c</TD>\n",porcentaje2,porcentaje,'%');
                     }else{//Extendida
@@ -1525,12 +1564,15 @@ void graficarMBR(QString direccion, QString destino, QString extension){
 
         int index_Extendida = -1;
         for (int i = 0; i < 4; i++){
-            if(masterBoot.mbr_partition[i].part_start!=-1 && masterBoot.mbr_partition[i].part_status!=1){
+            if(masterBoot.mbr_partition[i].part_start!=-1 && masterBoot.mbr_partition[i].part_status!='1'){
                 if(masterBoot.mbr_partition[i].part_type == 'E'){
                     index_Extendida = i;
                 }
                 char status[3];
-                if(masterBoot.mbr_partition[i].part_status == 0) strcpy(status,"0");
+                if(masterBoot.mbr_partition[i].part_status == '0')
+                    strcpy(status,"0");
+                else if(masterBoot.mbr_partition[i].part_status == '2')
+                    strcpy(status,"2");
                 fprintf(graphDot,"<tr>  <td><b>part_status_%d</b></td> <td>%s</td>  </tr>\n",i,status);
                 fprintf(graphDot,"<tr>  <td><b>part_type_%d</b></td> <td>%c</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_type);
                 fprintf(graphDot,"<tr>  <td><b>part_fit_%d</b></td> <td>%c</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_fit);
@@ -1548,13 +1590,16 @@ void graficarMBR(QString direccion, QString destino, QString extension){
             EBR extendedBoot;
             fseek(fp,masterBoot.mbr_partition[index_Extendida].part_start,SEEK_SET);
             while(fread(&extendedBoot,sizeof(EBR),1,fp)!=0 && (ftell(fp) < masterBoot.mbr_partition[index_Extendida].part_start + masterBoot.mbr_partition[index_Extendida].part_size)) {
-                if(extendedBoot.part_status != 1){
+                if(extendedBoot.part_status != '1'){
                     fprintf(graphDot,"subgraph cluster_%d{\n label=\"EBR_%d\"\n",index_ebr,index_ebr);
                     fprintf(graphDot,"\ntbl_%d[shape=box, label=<\n ",index_ebr);
                     fprintf(graphDot, "<table border=\'0\' cellborder=\'1\' cellspacing=\'0\'  width=\'300\' height=\'160\' >\n ");
                     fprintf(graphDot, "<tr>  <td width=\'150\'><b>Nombre</b></td> <td width=\'150\'><b>Valor</b></td>  </tr>\n");
                     char status[3];
-                    if(extendedBoot.part_status == 0) strcpy(status,"0");
+                    if(extendedBoot.part_status == '0')
+                        strcpy(status,"0");
+                    else if(extendedBoot.part_status == '2')
+                        strcpy(status,"2");
                     fprintf(graphDot, "<tr>  <td><b>part_status_1</b></td> <td>%s</td>  </tr>\n",status);
                     fprintf(graphDot, "<tr>  <td><b>part_fit_1</b></td> <td>%c</td>  </tr>\n",extendedBoot.part_fit);
                     fprintf(graphDot, "<tr>  <td><b>part_start_1</b></td> <td>%d</td>  </tr>\n",extendedBoot.part_start);
@@ -1577,6 +1622,7 @@ void graficarMBR(QString direccion, QString destino, QString extension){
         fclose(fp);
         string comando = "dot -T"+extension.toStdString()+" grafica.dot -o "+destino.toStdString();
         system(comando.c_str());
+        cout << "Reporte generado con exito " << endl;
     }
 }
 
