@@ -31,7 +31,7 @@ QString getDireccion(QString);
 bool existeParticion(QString, QString);
 int buscarParticion_P_E(QString, QString);
 int buscarParticion_L(QString, QString);
-void leerComando(std::string);
+void leerComando(char*);
 void graficarMBR(QString, QString, QString);
 void graficarDisco(QString, QString, QString);
 QString getExtension(QString);
@@ -106,11 +106,11 @@ int main()
 {
     imprimirEncabezado();
     while(flag_global){
-        char input[400];
+        char input[500];
         printf(">> ");
         fgets(input,sizeof (input),stdin);
-        string aux = input;
-        leerComando(aux);
+        //string aux = input;
+        leerComando(input);
         memset(input,0,400);
     }
 }
@@ -766,6 +766,22 @@ void recorrerEXEC(Nodo *raiz)
     QString valPath = raiz->hijos.at(0).valor;
     string auxPath = valPath.toStdString();
     string line;
+    FILE *fp;
+    if((fp = fopen(auxPath.c_str(),"r"))){
+        char line[400]="";
+        memset(line,0,sizeof(line));
+        while(fgets(line,sizeof line,fp)){
+            if(line[0]!='\n'){
+                cout << line << endl;
+                leerComando(line);
+            }
+            memset(line,0,sizeof(line));
+        }
+        fclose(fp);
+    }else{
+        cout << "error" << endl;
+    }
+    /*
     ifstream myfile(auxPath);
     if(myfile.is_open()){
         while(getline(myfile,line)){
@@ -779,6 +795,7 @@ void recorrerEXEC(Nodo *raiz)
     }else{
         cout << "ERROR no se encuentra el archivo" << endl;
     }
+    */
 }
 
 /*
@@ -1472,9 +1489,9 @@ int buscarParticion_L(QString direccion, QString nombre){
 /* Metodo para leer una linea tanto ingresada por el usuario como por un archi
  * @param string comando: linea a leer
 */
-void leerComando(string comando){
+void leerComando(char comando[400]){
     if(comando[0] != '#'){
-        YY_BUFFER_STATE buffer = yy_scan_string(comando.c_str());
+        YY_BUFFER_STATE buffer = yy_scan_string(comando);
         if(yyparse() == 0){
             if(raiz!=nullptr){
                 Graficador *g = new Graficador(raiz);
@@ -1526,7 +1543,7 @@ void graficarDisco(QString direccion, QString destino, QString extension){
                                     int fragmentacion = p2-p1;
                                     double porcentaje_real = (fragmentacion*100)/total;
                                     double porcentaje_aux = (porcentaje_real*500)/100;
-                                    fprintf(graphDot,"     <td height=\'200\' width=\'%.2f\'>LIBRE<br/> Ocupado: %.3f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
+                                    fprintf(graphDot,"     <td height=\'200\' width=\'%.2f\'>LIBRE<br/> Ocupado: %.2f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
                                 }
                             }
 
@@ -1534,7 +1551,7 @@ void graficarDisco(QString direccion, QString destino, QString extension){
                             int p1 = masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size;
                             int mbr_size = total;
                             if((mbr_size-p1)!=0){//Libre
-                                int libre = mbr_size - p1;
+                                int libre = (mbr_size - p1) + sizeof(MBR);
                                 double porcentaje_real = (libre*100)/total;
                                 double porcentaje_aux = (porcentaje_real*500)/100;
                                 fprintf(graphDot, "     <td height=\'200\' width=\'%.2f\'>LIBRE<br/> Ocupado: %.3f%c</td>\n",porcentaje_aux, porcentaje_real, '%');
@@ -1545,37 +1562,43 @@ void graficarDisco(QString direccion, QString destino, QString extension){
                         fprintf(graphDot,"     <td  height=\'200\' width=\"%.2f\">\n     <table border=\'0\'  height=\'200\' WIDTH=\'%.2f\' cellborder=\'1\'>\n",porcentaje_real,porcentaje_real);
                         fprintf(graphDot,"     <tr>  <td height=\"60\" width=\"%.3f\">EXTENDIDA</td>  </tr>\n     <tr>\n",porcentaje_real);
                         fseek(fp, masterboot.mbr_partition[i].part_start,SEEK_SET);
-                        while(fread(&extendedBoot,sizeof (EBR),1,fp)!=0 && (ftell(fp) < (masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size))){
-                            parcial = extendedBoot.part_size;
-                            porcentaje_real = (parcial*100)/total;
-                            cout << "Porcentaje " << porcentaje_real << endl;
-                            if(porcentaje_real!=0){
-                                if(extendedBoot.part_status != '1'){
-                                    fprintf(graphDot, "     <td height=\'140\'>EBR</td>\n");
-                                    fprintf(graphDot, "     <td height=\'140\'>LOGICA<br/>Ocupado: %.2f%c</td>\n",porcentaje_real,'%');
-                                }else{//Espacio no asignado
-                                    fprintf(graphDot, "      <td height=\'150\'>LIBRE<br/> Ocupado: %.2f%c</td>\n",porcentaje_real,'%');
+                        fread(&extendedBoot,sizeof(EBR),1,fp);
+                        if(extendedBoot.part_size != 0){//Si hay mas de alguna logica
+                            fseek(fp, masterboot.mbr_partition[i].part_start,SEEK_SET);
+                            while(fread(&extendedBoot,sizeof (EBR),1,fp)!=0 && (ftell(fp) < (masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size))){
+                                parcial = extendedBoot.part_size;
+                                porcentaje_real = (parcial*100)/total;
+                                if(porcentaje_real!=0){
+                                    if(extendedBoot.part_status != '1'){
+                                        fprintf(graphDot, "     <td height=\'140\'>EBR</td>\n");
+                                        fprintf(graphDot, "     <td height=\'140\'>LOGICA<br/>Ocupado: %.2f%c</td>\n",porcentaje_real,'%');
+                                    }else{//Espacio no asignado
+                                        fprintf(graphDot, "      <td height=\'150\'>LIBRE 1 <br/> Ocupado: %.2f%c</td>\n",porcentaje_real,'%');
+                                    }
+                                    if(extendedBoot.part_next==-1){
+                                        parcial = (masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size) - (extendedBoot.part_start + extendedBoot.part_size);
+                                        porcentaje_real = (parcial*100)/total;
+                                        fprintf(graphDot, "     <td height=\'150\'>LIBRE 2<br/> Ocupado: %.2f%c </td>\n",porcentaje_real,'%');
+                                        break;
+                                    }else
+                                        fseek(fp,extendedBoot.part_next,SEEK_SET);
                                 }
-                                if(extendedBoot.part_next==-1){
-                                    parcial = (masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size) - (extendedBoot.part_start + extendedBoot.part_size);
-                                    porcentaje_real = (parcial*100)/total;
-                                    fprintf(graphDot, "     <td height=\'150\'>LIBRE <br/> Ocupado: %.2f%c </td>\n",porcentaje_real,'%');
-                                    break;
-                                }else
-                                    fseek(fp,extendedBoot.part_next,SEEK_SET);
                             }
+                        }else{
+                            fprintf(graphDot,"     <td height=\'140\'> Ocupado %.2f%c</td>",porcentaje_real,'%');
                         }
-                        fprintf(graphDot,"     </tr>\n     </table>\n </td>");
+                        fprintf(graphDot,"     </tr>\n     </table>\n     </td>\n");
                     }
                 }else{//Espacio no asignado
                      fprintf(graphDot,"     <td height=\'200\' width=\'%.2f\'>LIBRE <br/> Ocupado: %f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
                 }
             }
         }
-        fprintf(graphDot,"     <td height='200'> ESPACIO LIBRE <br/> Ocupado: %.2f%c\n </td>",(100-espacioUsado),'%');
+
+        //fprintf(graphDot,"     <td height='200'> ESPACIO LIBRE <br/> Ocupado: %.2f%c\n     </td>",(100-espacioUsado),'%');
 
 
-        fprintf(graphDot,"     </tr> \n </table> \n>];\n\n}");
+        fprintf(graphDot,"     </tr> \n     </table>        \n>];\n\n}");
         fclose(graphDot);
         fclose(fp);
         string comando = "dot -T"+extension.toStdString()+" grafica.dot -o "+destino.toStdString();
@@ -1622,12 +1645,12 @@ void graficarMBR(QString direccion, QString destino, QString extension){
                     strcpy(status,"0");
                 else if(masterBoot.mbr_partition[i].part_status == '2')
                     strcpy(status,"2");
-                fprintf(graphDot,"<tr>  <td><b>part_status_%d</b></td> <td>%s</td>  </tr>\n",i,status);
-                fprintf(graphDot,"<tr>  <td><b>part_type_%d</b></td> <td>%c</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_type);
-                fprintf(graphDot,"<tr>  <td><b>part_fit_%d</b></td> <td>%c</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_fit);
-                fprintf(graphDot,"<tr>  <td><b>part_start_%d</b></td> <td>%d</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_start);
-                fprintf(graphDot,"<tr>  <td><b>part_size_%d</b></td> <td>%d</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_size);
-                fprintf(graphDot,"<tr>  <td><b>part_name_%d</b></td> <td>%s</td>  </tr>\n",i,masterBoot.mbr_partition[i].part_name);
+                fprintf(graphDot,"<tr>  <td><b>part_status_%d</b></td> <td>%s</td>  </tr>\n",(i+1),status);
+                fprintf(graphDot,"<tr>  <td><b>part_type_%d</b></td> <td>%c</td>  </tr>\n",(i+1),masterBoot.mbr_partition[i].part_type);
+                fprintf(graphDot,"<tr>  <td><b>part_fit_%d</b></td> <td>%c</td>  </tr>\n",(i+1),masterBoot.mbr_partition[i].part_fit);
+                fprintf(graphDot,"<tr>  <td><b>part_start_%d</b></td> <td>%d</td>  </tr>\n",(i+1),masterBoot.mbr_partition[i].part_start);
+                fprintf(graphDot,"<tr>  <td><b>part_size_%d</b></td> <td>%d</td>  </tr>\n",(i+1),masterBoot.mbr_partition[i].part_size);
+                fprintf(graphDot,"<tr>  <td><b>part_name_%d</b></td> <td>%s</td>  </tr>\n",(i+1),masterBoot.mbr_partition[i].part_name);
             }
         }
 
