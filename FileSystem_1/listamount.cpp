@@ -120,3 +120,19 @@ bool ListaMount::buscarNodo(QString direccion, QString nombre){
     }
     return false;
 }
+
+/* Metodo para desplegar las particiones montadas
+*/
+void ListaMount::mostrarLista(){
+    cout << "---------------------------------" << endl;
+    cout << "|       Particiones montadas    |" << endl;
+    cout << "---------------------------------" << endl;
+    cout << "|      Nombre    |    ID        |" << endl;
+    cout << "---------------------------------" << endl;
+    NodoMount *aux = primero;
+    while(aux!=nullptr){
+        cout << "|     "<< aux->nombre.toStdString() << "          " << "vd"<<aux->letra<<aux->num << endl;
+        cout << "---------------------------------" << endl;
+        aux = aux->siguiente;
+    }
+}
