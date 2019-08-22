@@ -598,7 +598,6 @@ void recorrerMOUNT(Nodo *raiz){
         if(flagPath){//Parametro obligatorio
             if(flagName){//Parametro obligtaorio
                 int indexP = buscarParticion_P_E(valPath,valName);
-                cout << "INDEX ENCONTRADO " << indexP << endl;
                 if(indexP != -1){
                     FILE *fp;
                     if((fp = fopen(valPath.toStdString().c_str(),"rb+"))){
@@ -1493,45 +1492,68 @@ void graficarDisco(QString direccion, QString destino, QString extension){
         fprintf(graphDot, "table [shape = box, label=<\n");
         fprintf(graphDot,"<table border=\'0\' cellborder=\'2\' width=\'600\' height=\"200\" color=\'LIGHTSTEELBLUE\'>\n");
         fprintf(graphDot, "<tr>");
-        fprintf(graphDot, "<td height=\'200\' width=\'100\'> MBR </td>");
+        fprintf(graphDot, "<td height=\'200\' width=\'100\'> MBR </td>\n");
         MBR masterboot;
-        fseek(graphDot,0,SEEK_SET);
+        fseek(fp,0,SEEK_SET);
         fread(&masterboot,sizeof(MBR),1,fp);
         int total = masterboot.mbr_size;
-        int parcial = 0;
         double espacioUsado = 0;
         for(int i = 0; i < 4; i++){
-            parcial = masterboot.mbr_partition[i].part_size;
-            double porcentaje = (parcial*100)/total;
-            double porcentaje2 = (porcentaje*500)/100;
-            espacioUsado += porcentaje2;
-            //Buscamos las particiones que no esten vacias
-            if((masterboot.mbr_partition[i].part_start != -1) && (masterboot.mbr_partition[i].part_status != '0')){
+            int parcial = masterboot.mbr_partition[i].part_size;
+            if(masterboot.mbr_partition[i].part_start == -1){//Particion vacia
+                //parcial = total - (masterboot.mbr_partition[i-1].part_start + masterboot.mbr_partition[i-1].part_size);
+                //double porcentaje_real = (parcial*100)/total;
+                //double porcentaje_aux = (porcentaje_real*500)/100;
+                //espacioUsado += porcentaje_real;
+            }else{
+                double porcentaje_real = (parcial*100)/total;
+                double porcentaje_aux = (porcentaje_real*500)/100;
+                espacioUsado += porcentaje_real;
                 if(masterboot.mbr_partition[i].part_status != '1'){
                     if(masterboot.mbr_partition[i].part_type == 'P'){
-                        fprintf(graphDot, "<TD HEIGHT=\"200\" WIDTH=\"%f\">PRIMARIA <br/> Ocupado: %f%c</TD>\n",porcentaje2,porcentaje,'%');
-                    }else{//Extendida
-                        fprintf(graphDot,"<td height=\'200\' width=\'%f\'> \n",porcentaje2);
-                        fprintf(graphDot,"<table border=\'0\' height=\'200\' width=\'%f\' cellborder=\'1\' >\n", porcentaje2);
-                        fprintf(graphDot, "<tr>\n");
-                        fprintf(graphDot,"<td height=\'50' width=\'%f\'>Extendida<\td>\n",porcentaje2);
-                        fprintf(graphDot, "</tr>\n ");
-                        fprintf(graphDot, "<tr>\n");
-                        fseek(fp,masterboot.mbr_partition[i].part_start,SEEK_SET);
-                        //EBR extendedBoot;
+                        fprintf(graphDot, "<td height=\"200\" width=\"%.2f\">PRIMARIA <br/> Ocupado: %.2f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
+                    }
+                    else if(masterboot.mbr_partition[i].part_type == 'E'){
+                        EBR extendedBoot;
+                        fprintf(graphDot,"<td  height=\'200\' width=\"%.3f\">\n<table border=\'0\'  height=\'200\' WIDTH=\'%.2f\' cellborder=\'1\'>\n",porcentaje_real,porcentaje_real);
+                        fprintf(graphDot,"<tr>  <td height=\"60\" width=\"%.3f\">EXTENDIDA</td>  </tr>\n<tr>\n",porcentaje_real);
+                        fseek(fp, masterboot.mbr_partition[i].part_start,SEEK_SET);
+                        while(fread(&extendedBoot,sizeof (EBR),1,fp)!=0 && (ftell(fp) < (masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size))){
+                            parcial = extendedBoot.part_size;
+                            porcentaje_real = (parcial*100)/total;
+                            if(porcentaje_real!=0){
+                                if(extendedBoot.part_status != '1'){
+                                    fprintf(graphDot, "<td height=\'140\'>EBR</td>\n");
+                                    fprintf(graphDot, "<td height=\'140\'>LOGICA<br/>Ocupado: %.2f%c</td>\n",porcentaje_real,'%');
+                                }else{//Espacio no asignado
+                                    fprintf(graphDot, "<td height=\'150\'>LIBRE<br/> Ocupado: %.2f%c</td>\n",porcentaje_real,'%');
+                                }
+                                if(extendedBoot.part_next==-1){
+                                    parcial = (masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size) - (extendedBoot.part_start + extendedBoot.part_size);
+                                    porcentaje_real = (parcial*100)/total;
+                                    fprintf(graphDot, "<td height=\'150\'>LIBRE <br/> Ocupado: %.2f%c </td>\n",porcentaje_real,'%');
+                                    break;
+                                }else
+                                    fseek(fp,extendedBoot.part_next,SEEK_SET);
+                            }
+                        }
+                        fprintf(graphDot, "<td>1\n</td></tr>\n</table>\n </td>");
                     }
 
-                }else{//Eliminada fast
-
+                }else{//No asignado
+                    fprintf(graphDot, "<td height=\'200\' width=\'%.2f\'>LIBRE <br/> Ocupado: %f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
                 }
             }
         }
-        fprintf(graphDot,"<td height='200' width=\'%f\'> ESPACIO LIBRE </td>",(100-espacioUsado));
+        fprintf(graphDot,"<td height='200'> ESPACIO LIBRE <br/> Ocupado: %.2f%c\n </td>",(100-espacioUsado),'%');
+
+
         fprintf(graphDot, "</tr> \n </table> \n>];\n}");
         fclose(graphDot);
         fclose(fp);
-        string comando = "dot -T"+extension.toStdString()+"grafica.dot -o "+destino.toStdString();
+        string comando = "dot -T"+extension.toStdString()+" grafica.dot -o "+destino.toStdString();
         system(comando.c_str());
+        cout << "Reporte generado con exito " << endl;
     }else{
         cout << "ERROR al crear reporte, disco no encontrado" << endl;
     }
