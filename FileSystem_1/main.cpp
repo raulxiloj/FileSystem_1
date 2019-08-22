@@ -35,6 +35,7 @@ void leerComando(char*);
 void graficarMBR(QString, QString, QString);
 void graficarDisco(QString, QString, QString);
 QString getExtension(QString);
+QString getFileName(QString);
 
 using namespace std;
 
@@ -278,7 +279,14 @@ void recorrerMKDISK(Nodo *raiz)
             if(flagSize){//Parametro size obligatorio
                 MBR masterboot;
                 int total_size = 1024;
+                //Archivo principal
                 crearArchivo(valPath);
+                //Archivo raid
+                QString auxRaid = getDirectorio(valPath);
+                QString nameRaid = getFileName(valPath);
+                QString valRaid = auxRaid+nameRaid+"_raid.disk";
+                crearArchivo(valRaid);
+
                 masterboot.mbr_date_created = time(nullptr);//-------
                 masterboot.mbr_disk_signature = (int)time(nullptr);//--------
 
@@ -310,6 +318,7 @@ void recorrerMKDISK(Nodo *raiz)
                     strcpy(masterboot.mbr_partition[p].part_name,"");
                 }
 
+                /*Archivo principal*/
                 //Comando para genera un archivo de cierto tamano
                 string comando = "dd if=/dev/zero of=\""+valPath.toStdString()+"\" bs=1024 count="+to_string(total_size);
                 system(comando.c_str());
@@ -317,6 +326,15 @@ void recorrerMKDISK(Nodo *raiz)
                 fseek(fp,0,SEEK_SET);
                 fwrite(&masterboot,sizeof(MBR),1,fp);
                 fclose(fp);
+
+                /*Archivo raid*/
+                string comando2 = "dd if=/dev/zero of=\""+valRaid.toStdString()+"\" bs=1024 count="+to_string(total_size);
+                system(comando2.c_str());
+                FILE *fp2 = fopen(valRaid.toStdString().c_str(),"rb+");
+                fseek(fp2,0,SEEK_SET);
+                fwrite(&masterboot,sizeof(MBR),1,fp2);
+                fclose(fp2);
+
                 cout << endl;
                 cout << "Disco creado con exito" << endl;
             }else{
@@ -781,21 +799,6 @@ void recorrerEXEC(Nodo *raiz)
     }else{
         cout << "error" << endl;
     }
-    /*
-    ifstream myfile(auxPath);
-    if(myfile.is_open()){
-        while(getline(myfile,line)){
-            cout << line << endl;
-            if(line.length()!=0){
-                leerComando(line);
-            }
-
-        }
-        myfile.close();
-    }else{
-        cout << "ERROR no se encuentra el archivo" << endl;
-    }
-    */
 }
 
 /*
@@ -1710,4 +1713,22 @@ QString getExtension(QString direccion){
         aux.erase(0,pos+delimiter.length());
     }
     return QString::fromStdString(aux);
+}
+
+/* Funcion que retorna el nombre de un archivo
+ * @param QString direccion: ruta del archivo
+ * @return nombre del archivo
+*/
+QString getFileName(QString direccion){
+    string aux = direccion.toStdString();
+    string delimiter = "/";
+    size_t pos = 0;
+    string res = "";
+    while((pos = aux.find(delimiter))!=string::npos){
+        aux.erase(0,pos + delimiter.length());
+    }
+    delimiter = ".";
+    pos = aux.find(delimiter);
+    res = aux.substr(0,pos);
+    return QString::fromStdString(res);
 }
