@@ -226,7 +226,7 @@ void recorrerMKDISK(Nodo *raiz)
                 break; //ERROR
             }
             flagFit = true;
-            valFit = n.valor.toStdString()[0];
+            valFit = n.hijos.at(0).valor.toStdString()[0];
             if(valFit == 'b'){
                 valFit = 'B';
             }else if(valFit == 'f'){
@@ -529,6 +529,11 @@ void recorrerFDISK(Nodo *raiz)
         }
     }
 
+    //Archivo RAID
+    QString auxRaid = getDirectorio(valPath);
+    QString raidName = getFileName(valPath);
+    QString valRaid = auxRaid + raidName + "_raid.disk";
+
     if(!flag){//Flag para ver si hay parametros repetidos
         if(flagPath){//Parametro obligatorio
             if(flagName){//Parametro obligatorio
@@ -538,14 +543,26 @@ void recorrerFDISK(Nodo *raiz)
                     }else{
                         if(flagType){//Si especifica tipo de particion
                             if(valType == 'P'){
+                                //Archivo principal
                                 crearParticionPrimaria(valPath, valName, valSize, valFit, valUnit);
+                                //Archivo raid
+                                crearParticionPrimaria(valRaid, valName, valSize, valFit, valUnit);
                             }else if(valType == 'E'){
-                                crearParticionExtendida(valPath, valName,valSize, valFit, valUnit);
+                                //Archivo principal
+                                crearParticionExtendida(valPath, valName, valSize, valFit, valUnit);
+                                //Archivo raid
+                                crearParticionExtendida(valRaid, valName, valSize, valFit, valUnit);
                             }else if(valType == 'L'){
-                                crearParticionLogica(valPath,valName,valSize,valFit,valUnit);
+                                //Archivo principal
+                                crearParticionLogica(valPath, valName, valSize, valFit, valUnit);
+                                //Archivo raid
+                                crearParticionLogica(valRaid, valName, valSize, valFit, valUnit);
                             }
                         }else{//Si no especifica se considera particion primaria
+                            //Archivo principal
                             crearParticionPrimaria(valPath, valName, valSize, valFit, valUnit);
+                            //Archivo raid
+                            crearParticionPrimaria(valRaid, valName, valSize, valFit, valUnit);
                         }
                     }
                 }else if(flagAdd){
@@ -553,7 +570,10 @@ void recorrerFDISK(Nodo *raiz)
                         cout << "<< ERROR: Parametros -size|-delete demas" << endl;
                     }else{
                         if(flagUnit){
-                            agregarQuitarParticion(valPath,valName,valAdd,valUnit);
+                            //Archivo principal
+                            agregarQuitarParticion(valPath, valName, valAdd, valUnit);
+                            //Archivo raid
+                            agregarQuitarParticion(valRaid, valName, valAdd, valUnit);
                         }else{
                             cout << "<< ERROR parametro -unit no definido "<< endl;
                         }
@@ -562,7 +582,10 @@ void recorrerFDISK(Nodo *raiz)
                     if(flagSize || flagAdd || flagFit || flagType){
                         cout << "<< ERROR: Parametros demas" << endl;
                     }else{
-                        eliminarParticion(valPath,valName,valDelete);
+                        //Archivo principal
+                        eliminarParticion(valPath, valName, valDelete);
+                        //Archivo raid
+                        eliminarParticion(valRaid, valName, valDelete);
                     }
                 }
             }else {
@@ -594,6 +617,7 @@ void recorrerMOUNT(Nodo *raiz){
             }
             flagPath = true;
             valPath = n.valor;
+            valPath = valPath.replace("\"","");
         }
             break;
         case NAME:
@@ -1391,6 +1415,7 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
                             strcpy(masterboot.mbr_partition[index].part_name,"");
                             fseek(fp,0,SEEK_SET);
                             fwrite(&masterboot,sizeof(MBR),1,fp);
+                            cout << "Particion primaria eliminada con exito" << endl;
                         }else{//full
                             masterboot.mbr_partition[index].part_status = '1';
                             strcpy(masterboot.mbr_partition[index].part_name,"");
@@ -1406,6 +1431,7 @@ void eliminarParticion(QString direccion, QString nombre, QString typeDelete){
                             strcpy(masterboot.mbr_partition[index].part_name,"");
                             fseek(fp,0,SEEK_SET);
                             fwrite(&masterboot,sizeof(MBR),1,fp);
+                            cout << "Particion extendida eliminada con exito" << endl;
                         }else{//full
                             masterboot.mbr_partition[index].part_status = '1';
                             strcpy(masterboot.mbr_partition[index].part_name,"");
@@ -1678,16 +1704,12 @@ void graficarDisco(QString direccion, QString destino, QString extension){
         for(int i = 0; i < 4; i++){
             int parcial = masterboot.mbr_partition[i].part_size;
             if(masterboot.mbr_partition[i].part_start != -1){//Particion vacia
-                //parcial = total - (masterboot.mbr_partition[i-1].part_start + masterboot.mbr_partition[i-1].part_size);
-                //double porcentaje_real = (parcial*100)/total;
-                //double porcentaje_aux = (porcentaje_real*500)/100;
-                //espacioUsado += porcentaje_real;
                 double porcentaje_real = (parcial*100)/total;
                 double porcentaje_aux = (porcentaje_real*500)/100;
                 espacioUsado += porcentaje_real;
                 if(masterboot.mbr_partition[i].part_status != '1'){
                     if(masterboot.mbr_partition[i].part_type == 'P'){
-                        fprintf(graphDot, "     <td height=\'200\' width=\'%.2f\'>PRIMARIA <br/> Ocupado: %.2f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
+                        fprintf(graphDot, "     <td height=\'200\' width=\'%.1f\'>PRIMARIA <br/> Ocupado: %.1f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
                         //Verificar que no haya espacio fragmentado
                         if(i!=3){
                             int p1 = masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size;
@@ -1697,23 +1719,24 @@ void graficarDisco(QString direccion, QString destino, QString extension){
                                     int fragmentacion = p2-p1;
                                     double porcentaje_real = (fragmentacion*100)/total;
                                     double porcentaje_aux = (porcentaje_real*500)/100;
-                                    fprintf(graphDot,"     <td height=\'200\' width=\'%.2f\'>LIBRE<br/> Ocupado: %.2f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
+                                    fprintf(graphDot,"     <td height=\'200\' width=\'%.1f\'>LIBRE<br/> Ocupado: %.1f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
                                 }
                             }
 
                         }else{
                             int p1 = masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size;
-                            int mbr_size = total;
+                            int mbr_size = total + (int)sizeof(MBR);
+                            cout << mbr_size << " - " << p1 << endl;
                             if((mbr_size-p1)!=0){//Libre
-                                int libre = (mbr_size - p1) + sizeof(MBR);
+                                double libre = (mbr_size - p1) + sizeof(MBR);
                                 double porcentaje_real = (libre*100)/total;
                                 double porcentaje_aux = (porcentaje_real*500)/100;
-                                fprintf(graphDot, "     <td height=\'200\' width=\'%.2f\'>LIBRE<br/> Ocupado: %.3f%c</td>\n",porcentaje_aux, porcentaje_real, '%');
+                                fprintf(graphDot, "     <td height=\'200\' width=\'%.1f\'>LIBRE<br/> Ocupado: %.1f%c</td>\n",porcentaje_aux, porcentaje_real, '%');
                             }
                         }
                     }else{//Extendida
                         EBR extendedBoot;
-                        fprintf(graphDot,"     <td  height=\'200\' width=\'%.2f\'>\n     <table border=\'0\'  height=\'200\' WIDTH=\'%.2f\' cellborder=\'1\'>\n",porcentaje_real,porcentaje_real);
+                        fprintf(graphDot,"     <td  height=\'200\' width=\'%.1f\'>\n     <table border=\'0\'  height=\'200\' WIDTH=\'%.1f\' cellborder=\'1\'>\n",porcentaje_real,porcentaje_real);
                         fprintf(graphDot,"     <tr>  <td height=\'60\' colspan=\'15\'>EXTENDIDA</td>  </tr>\n     <tr>\n");
                         fseek(fp, masterboot.mbr_partition[i].part_start,SEEK_SET);
                         fread(&extendedBoot,sizeof(EBR),1,fp);
@@ -1725,15 +1748,15 @@ void graficarDisco(QString direccion, QString destino, QString extension){
                                 if(porcentaje_real!=0){
                                     if(extendedBoot.part_status != '1'){
                                         fprintf(graphDot, "     <td height=\'140\'>EBR</td>\n");
-                                        fprintf(graphDot, "     <td height=\'140\'>LOGICA<br/>Ocupado: %.2f%c</td>\n",porcentaje_real,'%');
+                                        fprintf(graphDot, "     <td height=\'140\'>LOGICA<br/>Ocupado: %.1f%c</td>\n",porcentaje_real,'%');
                                     }else{//Espacio no asignado
-                                        fprintf(graphDot, "      <td height=\'150\'>LIBRE 1 <br/> Ocupado: %.2f%c</td>\n",porcentaje_real,'%');
+                                        fprintf(graphDot, "      <td height=\'150\'>LIBRE 1 <br/> Ocupado: %.1f%c</td>\n",porcentaje_real,'%');
                                     }
                                     if(extendedBoot.part_next==-1){
                                         parcial = (masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size) - (extendedBoot.part_start + extendedBoot.part_size);
                                         porcentaje_real = (parcial*100)/total;
                                         if(porcentaje_real!=0){
-                                            fprintf(graphDot, "     <td height=\'150\'>LIBRE 2<br/> Ocupado: %.2f%c </td>\n",porcentaje_real,'%');
+                                            fprintf(graphDot, "     <td height=\'150\'>LIBRE 2<br/> Ocupado: %.1f%c </td>\n",porcentaje_real,'%');
                                         }
                                         break;
                                     }else
@@ -1741,17 +1764,39 @@ void graficarDisco(QString direccion, QString destino, QString extension){
                                 }
                             }
                         }else{
-                            fprintf(graphDot,"     <td height=\'140\'> Ocupado %.2f%c</td>",porcentaje_real,'%');
+                            fprintf(graphDot,"     <td height=\'140\'> Ocupado %.1f%c</td>",porcentaje_real,'%');
                         }
                         fprintf(graphDot,"     </tr>\n     </table>\n     </td>\n");
+                        //Verificar que no haya espacio fragmentado
+                        if(i!=3){
+                            int p1 = masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size;
+                            int p2 = masterboot.mbr_partition[i+1].part_start;
+                            if(masterboot.mbr_partition[i+1].part_start != -1){
+                                if((p2-p1)!=0){//Hay fragmentacion
+                                    int fragmentacion = p2-p1;
+                                    double porcentaje_real = (fragmentacion*100)/total;
+                                    double porcentaje_aux = (porcentaje_real*500)/100;
+                                    fprintf(graphDot,"     <td height=\'200\' width=\'%.1f\'>LIBRE<br/> Ocupado: %.1f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
+                                }
+                            }
+                        }else{
+                            int p1 = masterboot.mbr_partition[i].part_start + masterboot.mbr_partition[i].part_size;
+                            int mbr_size = total + (int)sizeof(MBR);
+                            if((mbr_size-p1)!=0){//Libre
+                                double libre = (mbr_size - p1) + sizeof(MBR);
+                                double porcentaje_real = (libre*100)/total;
+                                double porcentaje_aux = (porcentaje_real*500)/100;
+                                fprintf(graphDot, "     <td height=\'200\' width=\'%.1f\'>LIBRE<br/> Ocupado: %.1f%c</td>\n",porcentaje_aux, porcentaje_real, '%');
+                            }
+                        }
                     }
                 }else{//Espacio no asignado
-                     fprintf(graphDot,"     <td height=\'200\' width=\'%.2f\'>LIBRE <br/> Ocupado: %f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
+                     fprintf(graphDot,"     <td height=\'200\' width=\'%.1f\'>LIBRE <br/> Ocupado: %.1f%c</td>\n",porcentaje_aux,porcentaje_real,'%');
                 }
             }
         }
 
-        //fprintf(graphDot,"     <td height='200'> ESPACIO LIBRE <br/> Ocupado: %.2f%c\n     </td>",(100-espacioUsado),'%');
+        //fprintf(graphDot,"     <td height='200'> ESPACIO LIBRE <br/> Ocupado: %.1f%c\n     </td>",(100-espacioUsado),'%');
 
 
         fprintf(graphDot,"     </tr> \n     </table>        \n>];\n\n}");
