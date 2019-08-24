@@ -35,9 +35,10 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
  - Y finalmente generaremos su respectivo reporte MBR y DISK
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/reports.png)
  - Reporte tipo disk
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/reporte1.jpg)
  - Reporte tipo MBR
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/reporte2.jpg)
  
-
 ## Herramientas utilizadas:
 - C/C++ (Lenguaje de programacion) 
 - Qt Creator (IDE)
