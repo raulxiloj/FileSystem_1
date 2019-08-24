@@ -26,9 +26,17 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/rmdisk.png)
  - Aunque se haya eliminado un disco, siempre quedara una copia del mismo 
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/rmdisk_1.png)
+ - Crearemos algunas particiones, 3 primarias, 1 extendida y 2 logicas. 
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/fdisk_2.png)
+ - Eliminaremos la particion primaria 1 llamada Part1
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/fdisk_del.png)
+ - Montaremos la particion 3 al sistema
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/mounti.png)
+ - Y finalmente generaremos su respectivo reporte MBR y DISK
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/reports.png)
+ - Reporte tipo disk
+ - Reporte tipo MBR
  
- 
-
 
 ## Herramientas utilizadas:
 - C/C++ (Lenguaje de programacion) 
