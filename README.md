@@ -21,6 +21,7 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
  - Empezaremos con la creando de discos. Crearemos dos, el primero para crear particiones y el segundo para eliminarlo. Ambos  tendran un tamano de 50 MB
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/mkdisk_2.png)
  - Como la aplicacion cuenta con sistema RAID creara una copia de cada disco que tengamos.
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/mkdisk_1.png)
  
  
 
