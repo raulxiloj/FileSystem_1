@@ -24,6 +24,8 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/mkdisk_1.png)
  - Eliminamos el segundo disco
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/rmdisk.png)
+ - Aunque se haya eliminado un disco, siempre quedara una copia del mismo 
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/rmdisk_1.png)
  
  
 
