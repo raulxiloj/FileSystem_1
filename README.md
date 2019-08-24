@@ -23,7 +23,7 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
 - Graphviz (Para los reportes)
 
 ## Tutorial
- - 1. Cuando inicie el programa usted encontrara la siguiente consola donde tendra que escribir los comandos previamente detallados.
+ 1. Cuando inicie el programa usted encontrara la siguiente consola donde tendra que escribir los comandos previamente detallados.
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/Inicio.png)
 
 ## Autor 
