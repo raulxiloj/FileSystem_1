@@ -15,6 +15,16 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
 - REP: Generara un reporte tipo imagen
 - EXEC: Ejecutara un archivo con comandos ya escritos. 
 
+## Tutorial
+ - Cuando inicie el programa usted encontrara la siguiente consola donde tendra que escribir los comandos previamente detallados.
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/Inicio.png)
+ - Empezaremos con la creando de discos. Crearemos dos, el primero para crear particiones y el segundo para eliminarlo. Ambos  tendran un tamano de 50 MB
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/mkdisk_2.png)
+ - Como la aplicacion cuenta con sistema RAID creara una copia de cada disco que tengamos.
+ 
+ 
+
+
 ## Herramientas utilizadas:
 - C/C++ (Lenguaje de programacion) 
 - Qt Creator (IDE)
@@ -22,9 +32,7 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
 - Flex / Bison para el analizador
 - Graphviz (Para los reportes)
 
-## Tutorial
- - Cuando inicie el programa usted encontrara la siguiente consola donde tendra que escribir los comandos previamente detallados.
- ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/Inicio.png)
+
 
 ## Autor 
 Raul Xiloj
