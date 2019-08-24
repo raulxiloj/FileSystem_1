@@ -1317,6 +1317,7 @@ void crearParticionLogica(QString direccion, QString nombre, int size, char fit,
                         //Escribimos el next del ultimo EBR
                         fseek(fp,ftell(fp) - sizeof (EBR),SEEK_SET);
                         fwrite(&extendedBoot, sizeof(EBR),1 ,fp);
+                        //Escribimos el nuevo EBR
                         fseek(fp,extendedBoot.part_start + extendedBoot.part_size, SEEK_SET);
                         extendedBoot.part_status = 0;
                         extendedBoot.part_fit = auxFit;
@@ -1564,17 +1565,43 @@ void agregarQuitarParticion(QString direccion, QString nombre, int add, char uni
                 if(!flagExtendida){//Primaria
                     if(tipo == "add"){//Agregar
                         //Verificar que exista espacio libre a la derecha
-                        if(index == 3){
-                            //No se puede
-                        }else{
-                            if(masterboot.mbr_partition[index + 1].part_status == '1'){
-                                if(masterboot.mbr_partition[index + 1].part_size >= size_Bytes){
+                        if(index!=3){
+                            int p1 = masterboot.mbr_partition[index].part_start + masterboot.mbr_partition[index].part_size;
+                            int p2 = masterboot.mbr_partition[index+1].part_start;
+                            if((p2 - p1) != 0){//Hay fragmentacion
+                                int fragmentacion = p2-p1;
+                                if(fragmentacion >= size_Bytes){
                                     masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
-                                    masterboot.mbr_partition[index + 1].part_size = (masterboot.mbr_partition[index + 1].part_size - size_Bytes);
-                                    masterboot.mbr_partition[index + 1].part_start = masterboot.mbr_partition[index + 1].part_start + size_Bytes;
                                     fseek(fp,0,SEEK_SET);
                                     fwrite(&masterboot,sizeof(MBR),1,fp);
-                                    cout << "Se agrego espacio a la particion de manera exitosa" << endl;
+                                    if(archivo == "principal") cout << "Se agrego espacio a la particion de manera exitosa" << endl;
+                                }else{
+                                    cout << "ERROR no es posible agregar espacio a la particion porque no hay suficiente espacio disponible a su derecha" << endl;
+                                }
+                            }else{//Espacio no usado
+                                if(masterboot.mbr_partition[index + 1].part_status == '1'){
+                                    if(masterboot.mbr_partition[index + 1].part_size >= size_Bytes){
+                                        masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
+                                        masterboot.mbr_partition[index + 1].part_size = (masterboot.mbr_partition[index + 1].part_size - size_Bytes);
+                                        masterboot.mbr_partition[index + 1].part_start = masterboot.mbr_partition[index + 1].part_start + size_Bytes;
+                                        fseek(fp,0,SEEK_SET);
+                                        fwrite(&masterboot,sizeof(MBR),1,fp);
+                                        if(archivo == "principal") cout << "Se agrego espacio a la particion de manera exitosa" << endl;
+                                    }else{
+                                        cout << "ERROR no es posible agregar espacio a la particion porque no hay suficiente espacio disponible a su derecha" << endl;
+                                    }
+                                }
+                            }
+                        }else{
+                            int p = masterboot.mbr_partition[index].part_start + masterboot.mbr_partition[index].part_size;
+                            int total = masterboot.mbr_size + (int)sizeof(MBR);
+                            if((total-p) != 0){
+                                int fragmentacion = total - p;
+                                if(fragmentacion >= size_Bytes){
+                                    masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
+                                    fseek(fp,0,SEEK_SET);
+                                    fwrite(&masterboot,sizeof(MBR),1,fp);
+                                    if(archivo == "principal") cout << "Se agrego espacio a la particion de manera exitosa" << endl;
                                 }else{
                                     cout << "ERROR no es posible agregar espacio a la particion porque no hay suficiente espacio disponible a su derecha" << endl;
                                 }
@@ -1582,32 +1609,90 @@ void agregarQuitarParticion(QString direccion, QString nombre, int add, char uni
                                 cout << "ERROR no es posible agregar espacio a la particion porque no hay espacio disponible a su derecha" << endl;
                             }
                         }
-                    }else{//Quitar
-
+                    }else{//Quitar espacio
+                        //Que no borre la particion
+                        if(size_Bytes >= masterboot.mbr_partition[index].part_size){
+                            cout << "ERROR no es posible quitarle esta cantidad de espacio a la particion porque la borraria" << endl;
+                        }else{
+                            masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size - size_Bytes;
+                            fseek(fp,0,SEEK_SET);
+                            fwrite(&masterboot,sizeof(MBR),1,fp);
+                            if(archivo == "principal") cout << "Se quito espacio a la particion de manera exitosa" << endl;
+                        }
                     }
                 }else{//Extendida
                     if(tipo == "add"){//Agregar
                         //Verificar que exista espacio libre a la derecha
-                        if(index == 3){
-                            //No se puede
+                        if(masterboot.mbr_partition[index + 1].part_status == '1'){
+                            if(masterboot.mbr_partition[index + 1].part_size >= size_Bytes){
+                                masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
+                                masterboot.mbr_partition[index + 1].part_size = (masterboot.mbr_partition[index + 1].part_size - size_Bytes);
+                                masterboot.mbr_partition[index + 1].part_start = masterboot.mbr_partition[index + 1].part_start + size_Bytes;
+                                fseek(fp,0,SEEK_SET);
+                                fwrite(&masterboot,sizeof(MBR),1,fp);
+                                if(archivo == "principal") cout << "Se agrego espacio a la particion de manera exitosa" << endl;
+                            }else{
+                                cout << "ERROR no es posible agregar espacio a la particion porque no hay suficiente espacio disponible a su derecha" << endl;
+                            }
                         }else{
-                            if(masterboot.mbr_partition[index + 1].part_status == '1'){
-                                if(masterboot.mbr_partition[index + 1].part_size >= size_Bytes){
-                                    masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
-                                    masterboot.mbr_partition[index + 1].part_size = (masterboot.mbr_partition[index + 1].part_size - size_Bytes);
-                                    masterboot.mbr_partition[index + 1].part_start = masterboot.mbr_partition[index + 1].part_start + size_Bytes;
-                                    fseek(fp,0,SEEK_SET);
-                                    fwrite(&masterboot,sizeof(MBR),1,fp);
-                                    cout << "Se agrego espacio a la particion de manera exitosa" << endl;
+                            //Verificar que haya espacio fragmentado
+                            if(index!=3){
+                                int p1 = masterboot.mbr_partition[index].part_start + masterboot.mbr_partition[index].part_size;
+                                int p2 = masterboot.mbr_partition[index+1].part_start;
+                                if((p2 - p1) != 0){//Hay fragmentacion
+                                    int fragmentacion = p2-p1;
+                                    if(fragmentacion >= size_Bytes){
+                                        masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
+                                        fseek(fp,0,SEEK_SET);
+                                        fwrite(&masterboot,sizeof(MBR),1,fp);
+                                        if(archivo == "principal") cout << "Se agrego espacio a la particion de manera exitosa" << endl;
+                                    }else{
+                                        cout << "ERROR no es posible agregar espacio a la particion porque no hay suficiente espacio disponible a su derecha" << endl;
+                                    }
                                 }else{
-                                    cout << "ERROR no es posible agregar espacio a la particion porque no hay suficiente espacio disponible a su derecha" << endl;
+                                    cout << "ERROR no es posible agregar espacio a la particion porque no hay espacio disponible a su derecha" << endl;
                                 }
                             }else{
-                                cout << "ERROR no es posible agregar espacio a la particion porque no hay espacio disponible a su derecha" << endl;
+                                int p = masterboot.mbr_partition[index].part_start + masterboot.mbr_partition[index].part_size;
+                                int total = masterboot.mbr_size + (int)sizeof(MBR);
+                                if((total-p) != 0){//Hay fragmentacion
+                                    int fragmentacion = total - p;
+                                    if(fragmentacion >= size_Bytes){
+                                        masterboot.mbr_partition[index].part_size = masterboot.mbr_partition[index].part_size + size_Bytes;
+                                        fseek(fp,0,SEEK_SET);
+                                        fwrite(&masterboot,sizeof(MBR),1,fp);
+                                        if(archivo == "principal") cout << "Se agrego espacio a la particion de manera exitosa" << endl;
+                                    }else{
+                                        cout << "ERROR no es posible agregar espacio a la particion porque no hay suficiente espacio disponible a su derecha" << endl;
+                                    }
+                                }else{
+                                    cout << "ERROR no es posible agregar espacio a la particion porque no hay espacio disponible a su derecha" << endl;
+                                }
                             }
                         }
-                    }else{//Quitar
-
+                    }else{//Quitar espacio
+                        //Que no borre la particion
+                        if(size_Bytes >= masterboot.mbr_partition[index_Extendida].part_size){
+                            cout << "ERROR no es posible quitarle esta cantidad de espacio a la particion porque la borraria" << endl;
+                        }else{
+                            EBR extendedBoot;
+                            fseek(fp, masterboot.mbr_partition[index_Extendida].part_start,SEEK_SET);
+                            fread(&extendedBoot,sizeof(EBR),1,fp);
+                            while((extendedBoot.part_next != -1) && (ftell(fp) < (masterboot.mbr_partition[index_Extendida].part_size + masterboot.mbr_partition[index_Extendida].part_start))){
+                                fseek(fp,extendedBoot.part_next,SEEK_SET);
+                                fread(&extendedBoot,sizeof(EBR),1,fp);
+                            }
+                            int ultimaLogica = extendedBoot.part_start+extendedBoot.part_size;
+                            int aux = (masterboot.mbr_partition[index_Extendida].part_start + masterboot.mbr_partition[index_Extendida].part_size) - size_Bytes;
+                            if(aux > ultimaLogica){//No toca ninguna logica
+                                masterboot.mbr_partition[index_Extendida].part_size = masterboot.mbr_partition[index_Extendida].part_size - size_Bytes;
+                                fseek(fp,0,SEEK_SET);
+                                fwrite(&masterboot,sizeof(MBR),1,fp);
+                                if(archivo == "principal") cout << "Se quito espacio a la particion de manera exitosa" << endl;
+                            }else{
+                                cout << "ERROR si quita ese espacio estaria danando una logica" << endl;
+                            }
+                        }
                     }
                 }
             }else{//Posiblemente logica
