@@ -122,7 +122,7 @@ void imprimirEncabezado()
     cout << "--------------------------------------------------------------------------------" << endl;
     cout << "                                                          Raul Xiloj - 201612113" << endl;
     cout << endl;
-    cout << "Por favor escriba algunos comandos:" << endl;
+    cout << "Por favor escriba algun comando:" << endl;
 }
 
 /*
@@ -944,8 +944,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
                         for(int i = 0; i < size_bytes; i++){
                             fwrite(&buffer,1,1,fp);
                         }
-                        cout << "..." << endl;
-                        cout << "Particion primaria creada con exito" << endl;
+                        if(archivo == "principal") cout << "...\n" << "Particion primaria creada con exito" <<  endl;
                     }else if(masterboot.mbr_disk_fit == 'B'){//BEST FIT
                         int bestIndex = numParticion;
                         for(int i = 0; i < 4; i++){
@@ -977,10 +976,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
                         for(int i = 0; i < size_bytes; i++){
                             fwrite(&buffer,1,1,fp);
                         }
-                        if(archivo == "principal"){
-                            cout << "..." << endl;
-                            cout << "Particion primaria creada con exito" << endl;
-                        }
+                        if(archivo == "principal") cout << "...\n" << "Particion primaria creada con exito" <<  endl;
                     }else if(masterboot.mbr_disk_fit == 'W'){//WORST FIT
                         int  worstIndex= numParticion;
                         for(int i = 0; i < 4; i++){
@@ -1012,10 +1008,7 @@ void crearParticionPrimaria(QString direccion, QString nombre, int size, char fi
                         for(int i = 0; i < size_bytes; i++){
                             fwrite(&buffer,1,1,fp);
                         }
-                        if(archivo == "principal"){
-                            cout << "..." << endl;
-                            cout << "Particion primaria creada con exito" << endl;
-                        }
+                        if(archivo == "principal") cout << "...\n" << "Particion primaria creada con exito" <<  endl;
                     }
                 }else{
                     cout << "ERROR ya existe una particion con ese nombre" << endl;
@@ -1132,10 +1125,7 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
                             for(int i = 0; i < (size_bytes - (int)sizeof(EBR)); i++){
                                 fwrite(&buffer,1,1,fp);
                             }
-                            if(archivo == "principal"){
-                                cout << "..." << endl;
-                                cout << "Particion extendida creada con exito" << endl;
-                            }
+                            if(archivo == "principal") cout << "...\n" << "Particion extendida creada con exito"<< endl;
                         }else if(masterboot.mbr_disk_fit == 'B'){
                             int bestIndex = numParticion;
                             for(int i = 0; i < 4; i++){
@@ -1175,10 +1165,7 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
                             for(int i = 0; i < (size_bytes - (int)sizeof(EBR)); i++){
                                 fwrite(&buffer,1,1,fp);
                             }
-                            if(archivo == "principal"){
-                                cout << "..." << endl;
-                                cout << "Particion extendida creada con exito" << endl;
-                            }
+                            if(archivo == "principal") cout << "...\n" << "Particion extendida creada con exito"<< endl;
                         }else if(masterboot.mbr_disk_fit == 'W'){
                             int  worstIndex= numParticion;
                             for(int i = 0; i < 4; i++){
@@ -1218,10 +1205,7 @@ void crearParticionExtendida(QString direccion, QString nombre, int size, char f
                             for(int i = 0; i < (size_bytes - (int)sizeof(EBR)); i++){
                                 fwrite(&buffer,1,1,fp);
                             }
-                            if(archivo == "principal"){
-                                cout << "..." << endl;
-                                cout << "Particion extendida creada con exito" << endl;
-                            }
+                            if(archivo == "principal") cout << "...\n" << "Particion extendida creada con exito"<< endl;
                         }
                     }else{
                         cout << "ERROR ya existe una particion con ese nombre" << endl;
@@ -1304,7 +1288,7 @@ void crearParticionLogica(QString direccion, QString nombre, int size, char fit,
                         strcpy(extendedBoot.part_name, nombre.toStdString().c_str());
                         fseek(fp, masterboot.mbr_partition[numExtendida].part_start ,SEEK_SET);
                         fwrite(&extendedBoot,sizeof(EBR),1,fp);
-                        if(archivo == "principal") cout << "Particion logica creada con exito "<< endl;
+                        if(archivo == "principal") cout << "...\nParticion logica creada con exito "<< endl;
                     }
                 }else{
                     while((extendedBoot.part_next != -1) && (ftell(fp) < (masterboot.mbr_partition[numExtendida].part_size + masterboot.mbr_partition[numExtendida].part_start))){
@@ -1697,6 +1681,10 @@ void agregarQuitarParticion(QString direccion, QString nombre, int add, char uni
                     int logica = buscarParticion_L(direccion, nombre);
                     if(logica != -1){
                         if(tipo == "add"){
+                            //Verificar que exista espacio libre a su derecha
+                            EBR extendedBoot;
+                            fseek(fp,logica,SEEK_SET);
+                            fread(&extendedBoot,sizeof(EBR),1,fp);
 
                         }else{//Quitar
                             //Verificar que no la elimine
@@ -1711,7 +1699,6 @@ void agregarQuitarParticion(QString direccion, QString nombre, int add, char uni
                                 fwrite(&extendedBoot,sizeof(EBR),1,fp);
                                 if(archivo == "principal") cout << "Se quito espacio a la particion de manera exitosa" << endl;
                             }
-
                         }
                     }else{
                         cout << "ERROR no se encuentra la particion" << endl;
