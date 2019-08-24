@@ -22,6 +22,8 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/mkdisk_2.png)
  - Como la aplicacion cuenta con sistema RAID creara una copia de cada disco que tengamos.
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/mkdisk_1.png)
+ - Eliminamos el segundo disco
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/rmdisk.png)
  
  
 
