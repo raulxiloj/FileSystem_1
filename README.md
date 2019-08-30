@@ -1,6 +1,6 @@
 # Sistema de archivos 
 
-Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra menus, sino que se utilizaran comandos. No distinguira entre mayúsculas y minúsculas. Solo se puede colocar un comando por línea. Ademas tambien se simulara un sistema RAID 1, para tener una copia de cada disco como respaldo. Toda la informacion se detalla mas en el archivo Proyecto1.pdf 
+Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra menus, sino que se utilizaran comandos. No distinguira entre mayúsculas y minúsculas. Solo se puede colocar un comando por línea. Ademas tambien se simulara un sistema RAID 1, para tener una copia de cada disco como respaldo. Toda la informacion se detalla mas en el archivo Fase1.pdf 
 
 ## Instalacion
 - Descargar repositorio
