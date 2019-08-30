@@ -698,7 +698,6 @@ void recorrerMOUNT(Nodo *raiz){
                         cout << "ERROR no se encuentra la particion a montar" << endl;
                     }
                 }
-
             }else{
                 cout << "ERROR parametro -name no definido" << endl;
             }
@@ -1510,7 +1509,7 @@ void agregarQuitarParticion(QString direccion, QString nombre, int add, char uni
     int size_Bytes = 0;
     QString tipo = "";
 
-    if(add < 0)
+    if(add > 0)
         tipo = "add";
 
     if(tipo != "add")
