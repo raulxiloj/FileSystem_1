@@ -16,7 +16,7 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
 - EXEC: Ejecutara un archivo con comandos ya escritos. 
 
 ## Tutorial
- - Cuando inicie el programa usted encontrara la siguiente consola donde tendra que escribir los comandos previamente detallados.
+ - Cuando inicie el programa usted encontrara la siguiente consola donde tendra que escribir los comandos que se detallaron anteriormente. Recuerde que solo se puede ejecutar un comando por linea. 
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/Inicio.png)
  - Empezaremos con la creando de discos. Crearemos dos, el primero para crear particiones y el segundo para eliminarlo. Ambos  tendran un tamano de 50 MB
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/mkdisk_2.png)
@@ -35,9 +35,10 @@ Es una aplicacion en consola que simulara un sistema de archivos. Esta no tendra
  - Y finalmente generaremos su respectivo reporte MBR y DISK
  ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/reports.png)
  - Reporte tipo disk
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/reporte1.jpg)
  - Reporte tipo MBR
+ ![No se encuentra la imagen](https://github.com/raulxiloj/FileSystem_1/blob/master/Imagenes/reporte2.jpg)
  
-
 ## Herramientas utilizadas:
 - C/C++ (Lenguaje de programacion) 
 - Qt Creator (IDE)
